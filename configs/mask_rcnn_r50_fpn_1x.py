@@ -184,7 +184,9 @@ log_config = dict(
 total_epochs = 300
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-work_dir = './work_dirs/mask_rcnn_r50_fpn_1x'
+#work_dir = './work_dirs/mask_rcnn_r50_fpn_1x'
+work_dir = '/content/drive/My Drive/work_dirs/mask_rcnn_r50_fpn_1x'
+
 load_from = None
 resume_from = None
 workflow = [('train', 1)]
