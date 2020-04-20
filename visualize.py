@@ -21,21 +21,22 @@ class visualize_mmdetection():
             self.dict_list.append(info)
 
         for i in range(1, len(self.dict_list)):
-            for value, key in dict(self.dict_list[i]).items():
+            #for value, key in dict(self.dict_list[i]).items():
                 # ------------find key for every iter-------------------#
-                loss_rpn_cls_value = dict(self.dict_list[i])['loss_rpn_cls']
-                loss_rpn_bbox_value = dict(self.dict_list[i])['loss_rpn_bbox']
-                loss_bbox_value = dict(self.dict_list[i])['loss_bbox']
-                loss_cls_value = dict(self.dict_list[i])['loss_cls']
-                loss_value = dict(self.dict_list[i])['loss']
-                acc_value = dict(self.dict_list[i])['acc']
-                # -------------list append------------------------------#
-                self.loss_rpn_cls.append(loss_rpn_cls_value)
-                self.loss_rpn_bbox.append(loss_rpn_bbox_value)
-                self.loss_bbox.append(loss_bbox_value)
-                self.loss_cls.append(loss_cls_value)
-                self.loss.append(loss_value)
-                self.acc.append(acc_value)
+                if dict(self.dict_list[i])['mode'] == 'train':
+                    loss_rpn_cls_value = dict(self.dict_list[i])['loss_rpn_cls']
+                    loss_rpn_bbox_value = dict(self.dict_list[i])['loss_rpn_bbox']
+                    loss_bbox_value = dict(self.dict_list[i])['loss_bbox']
+                    loss_cls_value = dict(self.dict_list[i])['loss_cls']
+                    loss_value = dict(self.dict_list[i])['loss']
+                    acc_value = dict(self.dict_list[i])['acc']
+                    # -------------list append------------------------------#
+                    self.loss_rpn_cls.append(loss_rpn_cls_value)
+                    self.loss_rpn_bbox.append(loss_rpn_bbox_value)
+                    self.loss_bbox.append(loss_bbox_value)
+                    self.loss_cls.append(loss_cls_value)
+                    self.loss.append(loss_value)
+                    self.acc.append(acc_value)
                 # -------------clear repeated value---------------------#
         self.loss_rpn_cls = list(OrderedDict.fromkeys(self.loss_rpn_cls))
         self.loss_rpn_bbox = list(OrderedDict.fromkeys(self.loss_rpn_bbox))
@@ -67,6 +68,9 @@ class visualize_mmdetection():
 
 
 if __name__ == '__main__':
+    path = 'D:\\JKingKong\\_毕业论文\\mmdetection-master\\20200419_130242.log.json'
     x = visualize_mmdetection(sys.argv[1])
+    # x = visualize_mmdetection(path)
+
     x.load_data()
     x.show_chart()
