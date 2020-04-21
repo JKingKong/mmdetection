@@ -104,4 +104,10 @@ class SingleRoIExtractor(nn.Module):
                 rois_ = rois[inds, :]
                 roi_feats_t = self.roi_layers[i](feats[i], rois_)
                 roi_feats[inds] = roi_feats_t
+                print("-------------------roi_feats_t----------------------")
+                print("roi_feats_t")
+        print("--------------------roi_feats-----------------------------------")
+        print("mmdet/models/roi_extractors/single_level.py")
+        print(roi_feats)
+        print("-----------------------roi_feats--------------------------------")
         return roi_feats
