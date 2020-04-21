@@ -169,6 +169,12 @@ class BBoxHead(nn.Module):
             return bboxes, scores
         else:
             # NMS抑制
+            print("------------------------------------bbox_head.py--------------------------------------------------")
+            print("===bboxes:", bboxes.shape)
+            print("===scores:", scores.shape)
+            print(bboxes)
+            print(scores)
+            print("--------------------------------------------------------------------------------------")
             det_bboxes, det_labels = multiclass_nms(bboxes, scores,
                                                     cfg.score_thr, cfg.nms,
                                                     cfg.max_per_img)

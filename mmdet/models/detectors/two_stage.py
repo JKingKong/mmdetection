@@ -304,14 +304,37 @@ class TwoStageDetector(BaseDetector, RPNTestMixin, BBoxTestMixin,
         else:
             proposal_list = proposals
 
+        # 调用mmdet/models/detectors/test_mixins.py 里的simple_test_mask()
+        # 获取框(x,y,w,h,置信度)和类标签
         det_bboxes, det_labels = self.simple_test_bboxes(
             x, img_metas, proposal_list, self.test_cfg.rcnn, rescale=rescale)
+
+        #
         bbox_results = bbox2result(det_bboxes, det_labels,
                                    self.bbox_head.num_classes)
+        import sys
+        print()
+        print("===================****************=====================")
+        print("--- current function from ", sys._getframe().f_code.co_filename)
+        print("--- current function is      ", sys._getframe().f_code.co_name)
+        print()
+        print("--- called from file           ", sys._getframe().f_back.f_code.co_filename)
+        print("--- called by function      ", sys._getframe().f_back.f_code.co_name)
+        print("--- called at line               ", sys._getframe().f_back.f_lineno)
+        print("===================****************=====================")
+        print()
+        print()
+        print("--------------------------------two_stage.py------------------------------------------------------")
+        print("===det_bboxes:",det_bboxes.shape)
+        print("===det_labels:",det_labels.shape)
+        print("===bbox_results:",bbox_results)
+        print("--------------------------------------------------------------------------------------")
+        print()
 
         if not self.with_mask:
             return bbox_results
         else:
+
             segm_results = self.simple_test_mask(
                 x, img_metas, det_bboxes, det_labels, rescale=rescale)
             return bbox_results, segm_results

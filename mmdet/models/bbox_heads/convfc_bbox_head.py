@@ -133,7 +133,7 @@ class ConvFCBBoxHead(BBoxHead):
     def forward(self, x):
         # shared part
         # x 是 mmdet/models/roi_extractors/single_level.py  forward 函数的结果,即ROI的结果
-        # x 的shape： box数 * 256 * 7 * 7
+        # x 的shape： box数 * 256 * 7 * 7 (ROI)
         if self.num_shared_convs > 0:
             for conv in self.shared_convs:
                 x = conv(x)
@@ -177,17 +177,17 @@ class ConvFCBBoxHead(BBoxHead):
         cls_score = self.fc_cls(x_cls) if self.with_cls else None
         # 回归后得到的框
         bbox_pred = self.fc_reg(x_reg) if self.with_reg else None
-        import sys
-        print()
-        print("===================****************=====================")
-        print("--- current function from ", sys._getframe().f_code.co_filename)
-        print("--- current function is      ", sys._getframe().f_code.co_name)
-        print()
-        print("--- called from file           ", sys._getframe().f_back.f_code.co_filename)
-        print("--- called by function      ", sys._getframe().f_back.f_code.co_name)
-        print("--- called at line               ", sys._getframe().f_back.f_lineno)
-        print("===================****************=====================")
-        print()
+        # import sys
+        # print()
+        # print("===================****************=====================")
+        # print("--- current function from ", sys._getframe().f_code.co_filename)
+        # print("--- current function is      ", sys._getframe().f_code.co_name)
+        # print()
+        # print("--- called from file           ", sys._getframe().f_back.f_code.co_filename)
+        # print("--- called by function      ", sys._getframe().f_back.f_code.co_name)
+        # print("--- called at line               ", sys._getframe().f_back.f_lineno)
+        # print("===================****************=====================")
+        # print()
         # 难点： 2 和 8 分别指的是？
         # cls_score的shape: box数 * 2
         # bbox_pred的shape：box数 * 8

@@ -104,16 +104,16 @@ class SingleRoIExtractor(nn.Module):
                 rois_ = rois[inds, :]
                 roi_feats_t = self.roi_layers[i](feats[i], rois_)
                 roi_feats[inds] = roi_feats_t
-        import sys
-        print()
-        print("===================****************=====================")
-        print("--- current function from ", sys._getframe().f_code.co_filename)
-        print("--- current function is      ", sys._getframe().f_code.co_name)
-        print()
-        print("--- called from file           ", sys._getframe().f_back.f_code.co_filename)
-        print("--- called by function      ", sys._getframe().f_back.f_code.co_name)
-        print("--- called at line               ", sys._getframe().f_back.f_lineno)
-        print("===================****************=====================")
-        print()
-        #
+        # import sys
+        # print()
+        # print("===================****************=====================")
+        # print("--- current function from ", sys._getframe().f_code.co_filename)
+        # print("--- current function is      ", sys._getframe().f_code.co_name)
+        # print()
+        # print("--- called from file           ", sys._getframe().f_back.f_code.co_filename)
+        # print("--- called by function      ", sys._getframe().f_back.f_code.co_name)
+        # print("--- called at line               ", sys._getframe().f_back.f_lineno)
+        # print("===================****************=====================")
+        # print()
+        #roi_feats的shape： box数 * 256 * 7 * 7(ROI)
         return roi_feats

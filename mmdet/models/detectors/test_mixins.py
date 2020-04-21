@@ -117,6 +117,7 @@ class BBoxTestMixin(object):
         cls_score, bbox_pred = self.bbox_head(roi_feats)
         img_shape = img_metas[0]['img_shape']
         scale_factor = img_metas[0]['scale_factor']
+        # 经过NMS抑制 和
         det_bboxes, det_labels = self.bbox_head.get_det_bboxes(
             rois,
             cls_score,
@@ -125,24 +126,27 @@ class BBoxTestMixin(object):
             scale_factor,
             rescale=rescale,
             cfg=rcnn_test_cfg)
+        # print()
+        # print("===================****************=====================")
+        # print("--- current function from ", sys._getframe().f_code.co_filename)
+        # print("--- current function is      ", sys._getframe().f_code.co_name)
+        # print()
+        # print("--- called from file           ", sys._getframe().f_back.f_code.co_filename)
+        # print("--- called by function      ", sys._getframe().f_back.f_code.co_name)
+        # print("--- called at line               ", sys._getframe().f_back.f_lineno)
+        # print("===================****************=====================")
+        # print()
         print()
-        print("===================****************=====================")
-        print("--- current function from ", sys._getframe().f_code.co_filename)
-        print("--- current function is      ", sys._getframe().f_code.co_name)
+        print("--------------------------------test_mixins.py------------------------------------------------------")
+        print("===roi_feats:",roi_feats.shape)
         print()
-        print("--- called from file           ", sys._getframe().f_back.f_code.co_filename)
-        print("--- called by function      ", sys._getframe().f_back.f_code.co_name)
-        print("--- called at line               ", sys._getframe().f_back.f_lineno)
-        print("===================****************=====================")
+        print("===cls_score:",cls_score.shape)
+        print("===bbox_pred:",bbox_pred.shape)
         print()
+        print("===det_bboxes:",det_bboxes.shape)
+        print("===det_labels:",det_labels.shape)
         print("--------------------------------------------------------------------------------------")
-        print("===det_bboxes:")
-        print(det_bboxes.shape)
-        print(det_bboxes)
-        print("===det_labels:")
-        print(det_labels.shape)
-        print(det_labels)
-        print("--------------------------------------------------------------------------------------")
+        print()
         return det_bboxes, det_labels
 
     def aug_test_bboxes(self, feats, img_metas, proposal_list, rcnn_test_cfg):
