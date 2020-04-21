@@ -132,6 +132,9 @@ class ConvFCBBoxHead(BBoxHead):
 
     def forward(self, x):
         # shared part
+        # x 是 mmdet/models/roi_extractors/single_level.py  forward 函数的结果
+        print("=======mmdet/models/bbox_heads/convfc_bbox_head.py forward()")
+        print(x[0])
         if self.num_shared_convs > 0:
             for conv in self.shared_convs:
                 x = conv(x)
@@ -168,6 +171,19 @@ class ConvFCBBoxHead(BBoxHead):
 
         cls_score = self.fc_cls(x_cls) if self.with_cls else None
         bbox_pred = self.fc_reg(x_reg) if self.with_reg else None
+        print("==============================")
+        print("cls_score:")
+        print(cls_score.dim())
+        print(cls_score)
+        print("bbox_pred:")
+        print(bbox_pred.dim())
+        print(bbox_pred)
+        '''
+            cls_scores (list[Tensor]): Box scores for each scale level
+                Has shape (N, num_anchors * num_classes, H, W)
+            bbox_preds (list[Tensor]): Box energies / deltas for each scale
+                level with shape (N, num_anchors * 4, H, W)
+        '''
         return cls_score, bbox_pred
 
 
@@ -186,3 +202,4 @@ class SharedFCBBoxHead(ConvFCBBoxHead):
             fc_out_channels=fc_out_channels,
             *args,
             **kwargs)
+        print("=============== user the SharedFCBBoxHead")
