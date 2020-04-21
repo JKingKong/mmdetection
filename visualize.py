@@ -74,3 +74,4 @@ if __name__ == '__main__':
 
     x.load_data()
     x.show_chart()
+

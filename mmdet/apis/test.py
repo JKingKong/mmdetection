@@ -10,12 +10,16 @@ from mmcv.runner import get_dist_info
 
 
 def single_gpu_test(model, data_loader, show=False):
+    # 设置为非训练模式
     model.eval()
     results = []
     dataset = data_loader.dataset
     prog_bar = mmcv.ProgressBar(len(dataset))
     for i, data in enumerate(data_loader):
         with torch.no_grad():
+            # 开始使用模型进行识别   调用
+            # 当前model对象的类型是：MMDataParallel
+            # 调用了MMDataParallel类型对象的爷爷方法__call__
             result = model(return_loss=False, rescale=not show, **data)
         results.append(result)
 

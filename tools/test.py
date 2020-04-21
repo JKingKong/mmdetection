@@ -144,9 +144,13 @@ def main():
         model.CLASSES = dataset.CLASSES
 
     if not distributed:
+        # 获得识别模型
+        # MMDataParallel 继承 DataParallel,而DataParallel 继承 Module
         model = MMDataParallel(model, device_ids=[0])
+        # 单GPU
         outputs = single_gpu_test(model, data_loader, args.show)
     else:
+        # 分布式
         model = MMDistributedDataParallel(
             model.cuda(),
             device_ids=[torch.cuda.current_device()],
