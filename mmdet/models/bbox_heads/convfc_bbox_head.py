@@ -132,9 +132,8 @@ class ConvFCBBoxHead(BBoxHead):
 
     def forward(self, x):
         # shared part
-        # x 是 mmdet/models/roi_extractors/single_level.py  forward 函数的结果
-        print("=======mmdet/models/bbox_heads/convfc_bbox_head.py forward()")
-        print(x[0])
+        # x 是 mmdet/models/roi_extractors/single_level.py  forward 函数的结果,即ROI的结果
+        # x 的shape： box数 * 256 * 7 * 7
         if self.num_shared_convs > 0:
             for conv in self.shared_convs:
                 x = conv(x)
@@ -148,9 +147,13 @@ class ConvFCBBoxHead(BBoxHead):
             for fc in self.shared_fcs:
                 x = self.relu(fc(x))
         # separate branches
+        # 两个分离的分分支
+        # 分类输入
         x_cls = x
+        # 回归输入
         x_reg = x
 
+        # 分类
         for conv in self.cls_convs:
             x_cls = conv(x_cls)
         if x_cls.dim() > 2:
@@ -160,6 +163,7 @@ class ConvFCBBoxHead(BBoxHead):
         for fc in self.cls_fcs:
             x_cls = self.relu(fc(x_cls))
 
+        # 回归
         for conv in self.reg_convs:
             x_reg = conv(x_reg)
         if x_reg.dim() > 2:
@@ -169,21 +173,24 @@ class ConvFCBBoxHead(BBoxHead):
         for fc in self.reg_fcs:
             x_reg = self.relu(fc(x_reg))
 
+        # 分类后得到的分数
         cls_score = self.fc_cls(x_cls) if self.with_cls else None
+        # 回归后得到的框
         bbox_pred = self.fc_reg(x_reg) if self.with_reg else None
-        print("==============================")
-        print("cls_score:")
-        print(cls_score.dim())
-        print(cls_score)
-        print("bbox_pred:")
-        print(bbox_pred.dim())
-        print(bbox_pred)
-        '''
-            cls_scores (list[Tensor]): Box scores for each scale level
-                Has shape (N, num_anchors * num_classes, H, W)
-            bbox_preds (list[Tensor]): Box energies / deltas for each scale
-                level with shape (N, num_anchors * 4, H, W)
-        '''
+        import sys
+        print()
+        print("===================****************=====================")
+        print("--- current function from ", sys._getframe().f_code.co_filename)
+        print("--- current function is      ", sys._getframe().f_code.co_name)
+        print()
+        print("--- called from file           ", sys._getframe().f_back.f_code.co_filename)
+        print("--- called by function      ", sys._getframe().f_back.f_code.co_name)
+        print("--- called at line               ", sys._getframe().f_back.f_lineno)
+        print("===================****************=====================")
+        print()
+        # 难点： 2 和 8 分别指的是？
+        # cls_score的shape: box数 * 2
+        # bbox_pred的shape：box数 * 8
         return cls_score, bbox_pred
 
 

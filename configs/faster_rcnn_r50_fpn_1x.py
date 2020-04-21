@@ -32,7 +32,7 @@ model = dict(
         roi_layer=dict(type='RoIAlign', out_size=7, sample_num=2),
         out_channels=256,
         featmap_strides=[4, 8, 16, 32]),
-    bbox_head=dict(
+    bbox_head=dict(  # box数 * 256 * 7 * 7
         type='SharedFCBBoxHead',
         num_fcs=2,
         in_channels=256,

@@ -100,12 +100,20 @@ class BBoxTestMixin(object):
                            proposals,
                            rcnn_test_cfg,
                            rescale=False):
+        ####====================================================================================
         """Test only det bboxes without augmentation."""
         rois = bbox2roi(proposals)
+        # 调用 mmdet/models/roi_extractors/single_level.py 下得到
+        # 得到roi_feats
         roi_feats = self.bbox_roi_extractor(
             x[:len(self.bbox_roi_extractor.featmap_strides)], rois)
         if self.with_shared_head:
             roi_feats = self.shared_head(roi_feats)
+
+        # 利用roi_feats得到cls_score, bbox_pred
+        # mmdet/models/bbox_heads/convfc_bbox_head.py  下的forward方法的返回值 分类过后的分数,回归框后的参数
+        # cls_score的shape: box数 * 2
+        # bbox_pred的shape：box数 * 8
         cls_score, bbox_pred = self.bbox_head(roi_feats)
         img_shape = img_metas[0]['img_shape']
         scale_factor = img_metas[0]['scale_factor']
@@ -117,6 +125,24 @@ class BBoxTestMixin(object):
             scale_factor,
             rescale=rescale,
             cfg=rcnn_test_cfg)
+        print()
+        print("===================****************=====================")
+        print("--- current function from ", sys._getframe().f_code.co_filename)
+        print("--- current function is      ", sys._getframe().f_code.co_name)
+        print()
+        print("--- called from file           ", sys._getframe().f_back.f_code.co_filename)
+        print("--- called by function      ", sys._getframe().f_back.f_code.co_name)
+        print("--- called at line               ", sys._getframe().f_back.f_lineno)
+        print("===================****************=====================")
+        print()
+        print("--------------------------------------------------------------------------------------")
+        print("===det_bboxes:")
+        print(det_bboxes.shape)
+        print(det_bboxes)
+        print("===det_labels:")
+        print(det_labels.shape)
+        print(det_labels)
+        print("--------------------------------------------------------------------------------------")
         return det_bboxes, det_labels
 
     def aug_test_bboxes(self, feats, img_metas, proposal_list, rcnn_test_cfg):
