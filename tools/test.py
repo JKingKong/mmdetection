@@ -129,6 +129,7 @@ def main():
         shuffle=False)
 
     # build the model and load checkpoint
+    # 根据配置文件 和 保存点建立模型
     model = build_detector(cfg.model, train_cfg=None, test_cfg=cfg.test_cfg)
     fp16_cfg = cfg.get('fp16', None)
     if fp16_cfg is not None:

@@ -40,4 +40,8 @@ def build_loss(cfg):
 
 
 def build_detector(cfg, train_cfg=None, test_cfg=None):
+    # 建立模型
+    # DETECTORS是一个装饰器
+    # dict(train_cfg=train_cfg, test_cfg=test_cfg) 根据传入的参数表示是 训练模型 还是 测试模型
+    #
     return build(cfg, DETECTORS, dict(train_cfg=train_cfg, test_cfg=test_cfg))
