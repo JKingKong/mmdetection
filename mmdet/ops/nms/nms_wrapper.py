@@ -34,6 +34,7 @@ def nms(dets, iou_thr, device_id=None):
         >>> assert len(inds) == len(suppressed) == 3
     """
     # convert dets (tensor or numpy array) to tensor
+    # 类型转换,保证dets是tensor类型
     if isinstance(dets, torch.Tensor):
         is_numpy = False
         dets_th = dets
@@ -57,6 +58,7 @@ def nms(dets, iou_thr, device_id=None):
 
     if is_numpy:
         inds = inds.cpu().numpy()
+    # 按照索引inds,保留dets的对应行
     return dets[inds, :], inds
 
 

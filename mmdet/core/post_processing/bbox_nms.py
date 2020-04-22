@@ -45,12 +45,14 @@ def multiclass_nms(multi_bboxes,
     # filter out boxes with low scores
     # 过滤掉分数 < score_thr的行
     valid_mask = scores > score_thr
-    filter_roi_feats = roi_feats[valid_mask]
-    # i = 0
-    # for one_row in scores:
-    #     if(one_row[0] > score_thr):
-    #         i = i + 1
-    #
+    # 保留对应的roi_feats
+    filter_roi_feats = roi_feats[0]
+    i = 0
+    for one_row in scores:
+        if(one_row[0] > score_thr):
+            filter_roi_feats = torch.cat((filter_roi_feats,roi_feats[i]),dim=0)
+            i = i + 1
+
     # bboxes对应scores保留行
     bboxes = bboxes[valid_mask]
 
@@ -82,6 +84,7 @@ def multiclass_nms(multi_bboxes,
     print("===multi_bboxes:", multi_bboxes.shape)
     print("===multi_scores:", multi_scores.shape)
     print("===roi_feats:",roi_feats)
+    print("===filter_roi_feats",filter_roi_feats)
     print()
     print("===valid_mask:", valid_mask.shape)
     print("===bboxes:", bboxes.shape)
@@ -95,9 +98,11 @@ def multiclass_nms(multi_bboxes,
     nms_cfg_ = nms_cfg.copy()
     nms_type = nms_cfg_.pop('type', 'nms')
     nms_op = getattr(nms_wrapper, nms_type)
-    # NMS操作--------
+    # nms_op：NMS操作(具体注释,输入,输出格式 进入上边一行的nms_wrapper里看)
+    # dets是NMS抑制后留下的bbox, keep是保留的行索引
     dets, keep = nms_op(
-        torch.cat([bboxes_for_nms, scores[:, None]], 1), **nms_cfg_)
+        torch.cat([bboxes_for_nms, scores[:, None]], 1),  # 这个cat操作将bbox和score按列拼接到一起 (?,4) + (?,1) ---> (?,5)
+        **nms_cfg_)
     bboxes = bboxes[keep]
     scores = dets[:, -1]  # soft_nms will modify scores
     labels = labels[keep]
