@@ -182,8 +182,6 @@ class BBoxHead(nn.Module):
             print("------------------------------------bbox_head.py--------------------------------------------------")
             print("===bboxes:", bboxes.shape)
             print("===scores:", scores.shape)
-            print(bboxes)
-            print(scores)
             print("===det_bboxes:", det_bboxes.shape)
             print("===det_labels:", det_labels.shape)
             print("--------------------------------------------------------------------------------------")

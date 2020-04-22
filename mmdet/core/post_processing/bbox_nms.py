@@ -95,6 +95,7 @@ def multiclass_nms(multi_bboxes,
     nms_cfg_ = nms_cfg.copy()
     nms_type = nms_cfg_.pop('type', 'nms')
     nms_op = getattr(nms_wrapper, nms_type)
+    # NMS操作--------
     dets, keep = nms_op(
         torch.cat([bboxes_for_nms, scores[:, None]], 1), **nms_cfg_)
     bboxes = bboxes[keep]
@@ -102,10 +103,27 @@ def multiclass_nms(multi_bboxes,
     labels = labels[keep]
 
     if keep.size(0) > max_num:
+        # 保存前 max_num个框
         _, inds = scores.sort(descending=True)
         inds = inds[:max_num]
         bboxes = bboxes[inds]
         scores = scores[inds]
         labels = labels[inds]
-
+    print()
+    print("------------------------------------bbox_nms.py  1111---------------------------------")
+    print("===max_coordinate:", max_coordinate)
+    print("===offsets:", offsets)
+    print("===bboxes_for_nms:", bboxes_for_nms)
+    print("===nms_cfg_:", nms_cfg_ )
+    print("===nms_type:", nms_type)
+    print("===nms_op:", nms_op)
+    print("--------")
+    print("===dets:", dets)
+    print("===keep:", keep)
+    print("--------")
+    print("===labels:",labels)
+    print("===scores:", scores)
+    print("===bboxes:", bboxes)
+    print("--------------------------------------------------------------------------------------")
+    print()
     return torch.cat([bboxes, scores[:, None]], 1), labels
