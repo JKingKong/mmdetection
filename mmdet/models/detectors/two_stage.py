@@ -309,7 +309,7 @@ class TwoStageDetector(BaseDetector, RPNTestMixin, BBoxTestMixin,
         det_bboxes, det_labels = self.simple_test_bboxes(
             x, img_metas, proposal_list, self.test_cfg.rcnn, rescale=rescale)
 
-        #
+        # 返回一个列表,不是tensor
         bbox_results = bbox2result(det_bboxes, det_labels,
                                    self.bbox_head.num_classes)
         import sys
@@ -327,7 +327,6 @@ class TwoStageDetector(BaseDetector, RPNTestMixin, BBoxTestMixin,
         print("--------------------------------two_stage.py------------------------------------------------------")
         print("===det_bboxes:",det_bboxes.shape)
         print("===det_labels:",det_labels.shape)
-        print("===bbox_results:",bbox_results.shape)
         print("--------------------------------------------------------------------------------------")
         print()
 
