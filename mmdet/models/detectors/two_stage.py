@@ -327,7 +327,7 @@ class TwoStageDetector(BaseDetector, RPNTestMixin, BBoxTestMixin,
         print("--------------------------------two_stage.py------------------------------------------------------")
         print("===det_bboxes:",det_bboxes.shape)
         print("===det_labels:",det_labels.shape)
-        print("===bbox_results:",bbox_results)
+        print("===bbox_results:",bbox_results.shape)
         print("--------------------------------------------------------------------------------------")
         print()
 

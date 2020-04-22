@@ -117,7 +117,7 @@ class BBoxTestMixin(object):
         cls_score, bbox_pred = self.bbox_head(roi_feats)
         img_shape = img_metas[0]['img_shape']
         scale_factor = img_metas[0]['scale_factor']
-        # 经过NMS抑制 和
+        # det_bboxes的shape:NMS抑制后的数量 * 5
         det_bboxes, det_labels = self.bbox_head.get_det_bboxes(
             rois,
             cls_score,

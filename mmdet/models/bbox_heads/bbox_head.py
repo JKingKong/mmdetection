@@ -169,16 +169,21 @@ class BBoxHead(nn.Module):
             return bboxes, scores
         else:
             # NMS抑制
+            # bboxes的shape:box数 * 8
+            # scores的shape:box数 * 2
+            # det_bboxes的shape:NMS抑制后的数量 * 5
+            # det_bboxes的shape:NMS抑制后的数量 * 1
+            det_bboxes, det_labels = multiclass_nms(bboxes, scores,
+                                                    cfg.score_thr, cfg.nms,
+                                                    cfg.max_per_img)
             print("------------------------------------bbox_head.py--------------------------------------------------")
             print("===bboxes:", bboxes.shape)
             print("===scores:", scores.shape)
             print(bboxes)
             print(scores)
+            print("===det_bboxes:", det_bboxes.shape)
+            print("===det_labels:", det_labels.shape)
             print("--------------------------------------------------------------------------------------")
-            det_bboxes, det_labels = multiclass_nms(bboxes, scores,
-                                                    cfg.score_thr, cfg.nms,
-                                                    cfg.max_per_img)
-
             return det_bboxes, det_labels
 
     @force_fp32(apply_to=('bbox_preds', ))
