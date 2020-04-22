@@ -334,7 +334,6 @@ class TwoStageDetector(BaseDetector, RPNTestMixin, BBoxTestMixin,
         if not self.with_mask:
             return bbox_results
         else:
-
             segm_results = self.simple_test_mask(
                 x, img_metas, det_bboxes, det_labels, rescale=rescale)
             return bbox_results, segm_results

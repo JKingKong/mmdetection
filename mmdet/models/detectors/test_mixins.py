@@ -112,7 +112,7 @@ class BBoxTestMixin(object):
 
         # 利用roi_feats得到cls_score, bbox_pred
         # mmdet/models/bbox_heads/convfc_bbox_head.py  下的forward方法的返回值 分类过后的分数,回归框后的参数
-        # cls_score的shape: box数 * 2
+        # cls_score的shape: box数 * 2 (第0列是背景分数,会被直接忽略)
         # bbox_pred的shape：box数 * 8
         cls_score, bbox_pred = self.bbox_head(roi_feats)
         img_shape = img_metas[0]['img_shape']
@@ -124,6 +124,7 @@ class BBoxTestMixin(object):
             bbox_pred,
             img_shape,
             scale_factor,
+            roi_feats=roi_feats, # 新加入的参数   为了得到预测框所对应的map
             rescale=rescale,
             cfg=rcnn_test_cfg)
         # print()

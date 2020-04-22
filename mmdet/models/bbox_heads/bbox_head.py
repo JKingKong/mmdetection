@@ -142,6 +142,7 @@ class BBoxHead(nn.Module):
                        bbox_pred,
                        img_shape,
                        scale_factor,
+                       roi_feats=None, # 新加入的参数   为了得到预测框所对应的map
                        rescale=False,
                        cfg=None):
         if isinstance(cls_score, list):
@@ -175,7 +176,9 @@ class BBoxHead(nn.Module):
             # det_bboxes的shape:NMS抑制后的数量 * 1
             det_bboxes, det_labels = multiclass_nms(bboxes, scores,
                                                     cfg.score_thr, cfg.nms,
-                                                    cfg.max_per_img)
+                                                    cfg.max_per_img,
+                                                    roi_feats=roi_feats  # 新加入的参数   为了得到预测框所对应的map
+                                                    )
             print("------------------------------------bbox_head.py--------------------------------------------------")
             print("===bboxes:", bboxes.shape)
             print("===scores:", scores.shape)
