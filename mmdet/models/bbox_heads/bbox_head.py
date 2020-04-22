@@ -145,6 +145,7 @@ class BBoxHead(nn.Module):
                        roi_feats=None, # 新加入的参数   为了得到预测框所对应的map
                        rescale=False,
                        cfg=None):
+        cls_score_for_load = cls_score
         if isinstance(cls_score, list):
             cls_score = sum(cls_score) / float(len(cls_score))
         scores = F.softmax(cls_score, dim=1) if cls_score is not None else None
@@ -177,14 +178,18 @@ class BBoxHead(nn.Module):
             det_bboxes, det_labels = multiclass_nms(bboxes, scores,
                                                     cfg.score_thr, cfg.nms,
                                                     cfg.max_per_img,
+                                                    rois = rois,
+                                                    cls_score = cls_score_for_load,
+                                                    bbox_pred = bbox_pred,
                                                     roi_feats=roi_feats  # 新加入的参数   为了得到预测框所对应的map
                                                     )
-            print("------------------------------------bbox_head.py--------------------------------------------------")
-            print("===bboxes:", bboxes.shape)
-            print("===scores:", scores.shape)
-            print("===det_bboxes:", det_bboxes.shape)
-            print("===det_labels:", det_labels.shape)
-            print("--------------------------------------------------------------------------------------")
+            # print("------------------------------------bbox_head.py--------------------------------------------------")
+            # print("===bboxes:", bboxes.shape)
+            # print("===scores:", scores.shape)
+            # print("===det_bboxes:", det_bboxes.shape)
+            # print("===det_labels:", det_labels.shape)
+            # print("--------------------------------------------------------------------------------------")
+
             return det_bboxes, det_labels
 
     @force_fp32(apply_to=('bbox_preds', ))

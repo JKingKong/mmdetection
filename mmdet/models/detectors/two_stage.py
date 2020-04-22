@@ -312,23 +312,23 @@ class TwoStageDetector(BaseDetector, RPNTestMixin, BBoxTestMixin,
         # 返回一个列表,不是tensor
         bbox_results = bbox2result(det_bboxes, det_labels,
                                    self.bbox_head.num_classes)
-        import sys
-        print()
-        print("===================****************=====================")
-        print("--- current function from ", sys._getframe().f_code.co_filename)
-        print("--- current function is      ", sys._getframe().f_code.co_name)
-        print()
-        print("--- called from file           ", sys._getframe().f_back.f_code.co_filename)
-        print("--- called by function      ", sys._getframe().f_back.f_code.co_name)
-        print("--- called at line               ", sys._getframe().f_back.f_lineno)
-        print("===================****************=====================")
-        print()
-        print()
-        print("--------------------------------two_stage.py------------------------------------------------------")
-        print("===det_bboxes:",det_bboxes.shape)
-        print("===det_labels:",det_labels.shape)
-        print("--------------------------------------------------------------------------------------")
-        print()
+        # import sys
+        # print()
+        # print("===================****************=====================")
+        # print("--- current function from ", sys._getframe().f_code.co_filename)
+        # print("--- current function is      ", sys._getframe().f_code.co_name)
+        # print()
+        # print("--- called from file           ", sys._getframe().f_back.f_code.co_filename)
+        # print("--- called by function      ", sys._getframe().f_back.f_code.co_name)
+        # print("--- called at line               ", sys._getframe().f_back.f_lineno)
+        # print("===================****************=====================")
+        # print()
+        # print()
+        # print("--------------------------------two_stage.py------------------------------------------------------")
+        # print("===det_bboxes:",det_bboxes.shape)
+        # print("===det_labels:",det_labels.shape)
+        # print("--------------------------------------------------------------------------------------")
+        # print()
 
         if not self.with_mask:
             return bbox_results

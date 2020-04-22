@@ -114,14 +114,32 @@ class BBoxTestMixin(object):
         # mmdet/models/bbox_heads/convfc_bbox_head.py  下的forward方法的返回值 分类过后的分数,回归框后的参数
         # cls_score的shape: box数 * 2 (第0列是背景分数,会被直接忽略)
         # bbox_pred的shape：box数 * 8
+
+        #读取文件的roi
+        #roi_feats = torch.load("/content/mmdetection/Z108_roi_feats.pt")
+        #roi_feats = torch.load("/content/mmdetection/Z108_roi_feats.pt")
+
         cls_score, bbox_pred = self.bbox_head(roi_feats)
         img_shape = img_metas[0]['img_shape']
         scale_factor = img_metas[0]['scale_factor']
+
+        # 载入张量
+        # root_path = "/content/mmdetection/"
+        # picture_name = "Z108"
+        # save_path = root_path + picture_name + "_filter_final_roi_feats.pt"
+        # roi_feats = torch.load(save_path)
+        # save_path = root_path + picture_name + "_filter_final_rois.pt"
+        # rois = torch.load(save_path)
+        # save_path = root_path + picture_name + "_filter_final_bbox_pred.pt"
+        # bbox_pred = torch.load(save_path)
+        # save_path = root_path + picture_name + "_filter_final_cls_score.pt"
+        # cls_score = torch.load(save_path)
+
         # det_bboxes的shape:NMS抑制后的数量 * 5
         det_bboxes, det_labels = self.bbox_head.get_det_bboxes(
-            rois,
-            cls_score,
-            bbox_pred,
+            rois,               # 原来的参数 必须保证load的.pt文件和这个维度一致，所以这里也需要保存后load
+            cls_score,          # 原来的参数 必须保证load的.pt文件和这个维度一致，所以这里也需要保存后load
+            bbox_pred,          # 原来的参数 必须保证load的.pt文件和这个维度一致，所以这里也需要保存后load
             img_shape,
             scale_factor,
             roi_feats=roi_feats, # 新加入的参数   为了得到预测框所对应的map
@@ -137,17 +155,19 @@ class BBoxTestMixin(object):
         # print("--- called at line               ", sys._getframe().f_back.f_lineno)
         # print("===================****************=====================")
         # print()
-        print()
-        print("--------------------------------test_mixins.py------------------------------------------------------")
-        print("===roi_feats:",roi_feats.shape)
-        print()
-        print("===cls_score:",cls_score.shape)
-        print("===bbox_pred:",bbox_pred.shape)
-        print()
-        print("===det_bboxes:",det_bboxes.shape)
-        print("===det_labels:",det_labels.shape)
-        print("--------------------------------------------------------------------------------------")
-        print()
+
+
+        # print()
+        # print("--------------------------------test_mixins.py------------------------------------------------------")
+        # print("===roi_feats:",roi_feats.shape)
+        # print()
+        # print("===cls_score:",cls_score.shape)
+        # print("===bbox_pred:",bbox_pred.shape)
+        # print()
+        # print("===det_bboxes:",det_bboxes.shape)
+        # print("===det_labels:",det_labels.shape)
+        # print("--------------------------------------------------------------------------------------")
+        # print()
         return det_bboxes, det_labels
 
     def aug_test_bboxes(self, feats, img_metas, proposal_list, rcnn_test_cfg):
