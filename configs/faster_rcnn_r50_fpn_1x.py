@@ -109,36 +109,7 @@ dataset_type = 'CocoDataset'
 data_root = 'data/coco/'
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
-train_pipeline = [
-    dict(type='LoadImageFromFile'),
-    dict(type='LoadAnnotations', with_bbox=True),
-    dict(type='Resize', img_scale=[(1333, 800),(2666,1600)], keep_ratio=True),  # 多尺度训练 放大图片 以提升小物体检测精度
-    dict(type='RandomFlip', flip_ratio=0.5),                                    # 训练时数据增强 参考mmdet/datasets/transform.py
-    dict(type='Normalize', **img_norm_cfg),
 
-    dict(type='Albu',transforms=albu_train_transforms,                          # 使用Albu进行数据增强
-         bbox_params=dict(
-             type='BboxParams',
-             format='pascal_voc',
-             label_fields=['gt_labels'],
-             min_visibility=0.0,
-             filter_lost_elements=True),
-         keymap={
-             'img': 'image',                # 在图像上使用
-             # 'gt_masks': 'masks',
-             'gt_bboxes': 'bboxes'          # 在bbox上使用
-         },
-        update_pad_shape=False,
-        skip_img_without_anno=True
-         ),
-    dict(type='Pad', size_divisor=32),
-    dict(type='DefaultFormatBundle'),
-    dict(
-        type='Collect',
-        keys=['img', 'gt_bboxes', 'gt_labels'],
-        meta_keys=('filename', 'ori_shape', 'img_shape', 'img_norm_cfg',
-               'pad_shape', 'scale_factor'))
-]
 # 设置albu的图像增强方式和参数
 # 查看文档：https://s0pypi0org.icopy.site/project/albumentations/      有像素级(不影响框)  空间级转换(影响框,所以要在上边加keymap 将操作映射到bbox上)
 albu_train_transforms = [
@@ -190,6 +161,38 @@ albu_train_transforms = [
         ],
         p=0.1),
 ]
+
+train_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='LoadAnnotations', with_bbox=True),
+    dict(type='Resize', img_scale=[(1333, 800),(2666,1600)], keep_ratio=True),  # 多尺度训练 放大图片 以提升小物体检测精度
+    dict(type='RandomFlip', flip_ratio=0.5),                                    # 训练时数据增强 参考mmdet/datasets/transform.py
+    dict(type='Normalize', **img_norm_cfg),
+
+    dict(type='Albu',transforms=albu_train_transforms,                          # 使用Albu进行数据增强
+         bbox_params=dict(
+             type='BboxParams',
+             format='pascal_voc',
+             label_fields=['gt_labels'],
+             min_visibility=0.0,
+             filter_lost_elements=True),
+         keymap={
+             'img': 'image',                # 在图像上使用
+             # 'gt_masks': 'masks',
+             'gt_bboxes': 'bboxes'          # 在bbox上使用
+         },
+        update_pad_shape=False,
+        skip_img_without_anno=True
+         ),
+    dict(type='Pad', size_divisor=32),
+    dict(type='DefaultFormatBundle'),
+    dict(
+        type='Collect',
+        keys=['img', 'gt_bboxes', 'gt_labels'],
+        meta_keys=('filename', 'ori_shape', 'img_shape', 'img_norm_cfg',
+               'pad_shape', 'scale_factor'))
+]
+
 
 test_pipeline = [
     dict(type='LoadImageFromFile'),

@@ -342,6 +342,9 @@ class CascadeRCNN(BaseDetector, RPNTestMixin):
 
         # rois: 符合bbox_roi_extractor输入参数的建议框格式
         rois = bbox2roi(proposal_list)
+        '''
+            集成其他模型的roi_feats
+        '''
         # 为了继续往下传获取预测框所对应的特征图
         final_bbox_feats = None
         # 级联结构,获取roi 而后抽取对应特征
@@ -359,7 +362,9 @@ class CascadeRCNN(BaseDetector, RPNTestMixin):
                 # 若设置了shared_head则使用
                 bbox_feats = self.shared_head(bbox_feats)
 
-            # 进行分类 和 框回归
+            '''
+            进行分类 和 框回归
+            '''
             cls_score, bbox_pred = bbox_head(bbox_feats)
 
             # 此级结果加入ms_scores
@@ -432,6 +437,30 @@ class CascadeRCNN(BaseDetector, RPNTestMixin):
             results = ms_bbox_result['ensemble']
 
         return results
+
+    def Ensemble_load_tensor(self,
+                             img_metas=None
+                             ):
+        save_path = "/content/drive/My Drive/detect-tensor/" + "CascadeRCNN" + "/"
+
+        images_name = img_metas[0]['filename'].split("/")[-1].split(".")[0]
+        # 保存框对应的rois(rois是用来作为roi_extractor的输入)张量
+        save_path = save_path + images_name + "-rois.pt"
+        rois = torch.load(save_path)
+        # 保存roi_extractor的输出张量
+        save_path = save_path + images_name + "-roi_feats.pt"
+        roi_feats = torch.load(save_path)
+        # 保存预测框张量
+        save_path = save_path + images_name + "-bbox_pred.pt"
+        bbox_pred = torch.load(save_path)
+        # 保存预测框分数
+        save_path = save_path + images_name + "-cls_score.pt"
+        cls_score = torch.load(save_path)
+        return rois,roi_feats,bbox_pred,cls_score
+
+
+    def Ensemble_roi_feats(self):
+        pass
 
     def aug_test(self, imgs, img_metas, proposals=None, rescale=False):
         """Test with augmentations.

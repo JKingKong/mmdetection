@@ -113,8 +113,9 @@ def multiclass_nms(multi_bboxes,
     2、nms抑制
 
     '''
-    Ensemble_union()
-    Ensembel_intersection()
+    if Ensemble_Test == True:
+        Ensemble_bboxes_union()
+        Ensembel_bboxes_intersection()
 
 
     max_coordinate = bboxes.max()
@@ -256,7 +257,7 @@ def save_tensor(   valid_mask = None,  # 过滤掉低分
     tensor_list = []
     tensor_list.append()
 
-    save_path = "/content/mmdetection/" + mode_name + "/"
+    save_path = "/content/drive/My Drive/detect-tensor/" + mode_name + "/"
     # img_metas[0]['filename']: 类似'/content/mmdetection/data/coco/val2017/Z107.jpg'
     images_name = img_metas[0]['filename'].split("/")[-1].split(".")[0]
     # 保存框对应的rois(rois是用来作为roi_extractor的输入)张量
@@ -275,7 +276,10 @@ def save_tensor(   valid_mask = None,  # 过滤掉低分
     save_path = save_path + images_name + "-bboxes.pt"
     torch.save(final_bboxes,save_path)
 
-def Ensemble_union(
+    save_path = save_path + images_name + "-labels.pt"
+    torch.save(final_labels,save_path)
+
+def Ensemble_bboxes_union(
                    bboxes=None,
                    img_metas=None,
                    mode_name=None):
@@ -286,7 +290,7 @@ def Ensemble_union(
     :return: 不同模型检测框的并集,而后再经过NMS抑制最终返回结果
     '''
 
-def Ensembel_intersection(
+def Ensembel_bboxes_intersection(
                    bboxes=None,
                    img_metas=None,
                    mode_name=None):
