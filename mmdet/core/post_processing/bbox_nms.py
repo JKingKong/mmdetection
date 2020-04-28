@@ -146,13 +146,14 @@ def multiclass_nms(multi_bboxes,
         torch.cat([bboxes_for_nms, scores[:, None]], 1),  # 这个cat操作将bbox和score按列拼接到一起 (?,4) + (?,1) ---> (?,5)
         **nms_cfg_)
     bboxes = bboxes[keep]
-    scores = dets[:, -1]  # soft_nms will modify scores
+    scores = dets[:, -1]  # soft_nms will modify scores   经过nms抑制过后的scores
     labels = labels[keep]
 
 
 
 
     # 3、框数量超过设定值,则要按照置信度取Top-max_num
+    # bboxes、scores、labels已经过nms抑制
     final_bboxes=bboxes # 要使用深拷贝
     final_scores=scores
     final_labels=labels
@@ -174,7 +175,7 @@ def multiclass_nms(multi_bboxes,
                        rois=rois,                # 保存
                        bbox_pred=bbox_pred,      # 保存
                        cls_score=cls_score,      # 保存
-
+                       keep=keep,                # NMS抑制后所保留的下标
                        bboxes=final_bboxes,      # 保存,为了方便使用自己编写的Ensemble_union 和 Ensemble_intersection函数
                        scores=final_scores,      # 保存,为了方便使用自己编写的Ensemble_union 和 Ensemble_intersection函数
                        labels=final_labels,      # 保存,为了方便使用自己编写的Ensemble_union 和 Ensemble_intersection函数
@@ -212,10 +213,10 @@ def save_tensor(valid_mask = None,  # 过滤掉低分
                roi_feats = None,    # 保存
                bbox_pred = None,    # 保存
                cls_score = None,    # 保存
+               keep=None,           #         经过nms抑制后保存的下标
                bboxes=None,         # 保存
-               scores=None,          # 保存
+               scores=None,          # 保存     已经经过nms抑制
                labels=None,         # 保存
-
                top_max_inds=None, # 根据参数保留前top_max个框
                img_metas=None,
                mode_name=None
@@ -244,38 +245,46 @@ def save_tensor(valid_mask = None,  # 过滤掉低分
     *********
     '''
 
+    # 2、去掉NMS抑制不通过的行(final_rois、final_roi_feats、final_bbox_pred、final_cls_score)
     # 为了创建引用
-    final_rois = filter_low_score_rois
-    final_roi_feats = filter_low_score_roi_feats
-    final_bbox_pred = filter_low_score_bbox_pred
-    final_cls_score = filter_low_score_cls_score
+    final_rois = filter_low_score_rois[keep]
+    final_roi_feats = filter_low_score_roi_feats[keep]
+    final_bbox_pred = filter_low_score_bbox_pred[keep]
+    final_cls_score = filter_low_score_cls_score[keep]
+
+    # 下边三个已经抑制过了
     final_bboxes = bboxes
     final_scores = scores
     final_labels = labels
 
-    # 2、去掉NMS抑制不通过的框
+    # 3、保存前x个置信度最高的框
     if top_max_inds is not None:
-        final_roi_feats = filter_low_score_roi_feats[top_max_inds]
         final_rois = filter_low_score_rois[top_max_inds]
+        final_roi_feats = filter_low_score_roi_feats[top_max_inds]
         final_bbox_pred = filter_low_score_bbox_pred[top_max_inds]
         final_cls_score = filter_low_score_cls_score[top_max_inds]
         final_bboxes = final_bboxes[top_max_inds]
         final_scores = final_scores[top_max_inds]
         final_labels = final_labels[top_max_inds]
+    print()
+    print("final_rois:",final_rois.shape)
+    print("final_roi_feats:", final_roi_feats.shape)
+    print("final_bbox_pred:", final_bbox_pred.shape)
+    print("final_cls_score:", final_cls_score.shape)
+    print("final_bboxes:", final_bboxes.shape)
+    print("final_scores:", final_scores.shape)
+    print("final_labels:", final_labels.shape)
+    print()
 
-
-    # 3、保存经过过滤后的预测框的张量
+    # 4、保存经过过滤后的预测框的张量
     # 更好的方案是把这几个张量用list保存到一个.pt张量文件里,读取之时按照下标取对应的张量对象,不然Io可能会很长时间
     # 保存到一个文件里的问题：张量的维度不同...???
-    tensor_list = []
-    tensor_list.append()
-
     save_path = "/content/drive/My Drive/detect-tensor/" + mode_name + "/"
     # img_metas[0]['filename']: 类似'/content/mmdetection/data/coco/val2017/Z107.jpg'
     images_name = img_metas[0]['filename'].split("/")[-1].split(".")[0]
 
     '''
-    为了方便融合特征
+    为了方便融合特征,将当前保存成文件
     '''
     # 保存框对应的rois(rois是用来作为roi_extractor的输入)张量
     save_path = save_path + images_name + "-rois.pt"

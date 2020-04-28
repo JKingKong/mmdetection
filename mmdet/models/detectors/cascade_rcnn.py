@@ -308,7 +308,9 @@ class CascadeRCNN(BaseDetector, RPNTestMixin):
 
         return losses
 
-    def simple_test(self, img, img_metas, proposals=None, rescale=False):
+    def simple_test(self, img, img_metas, proposals=None, rescale=False,
+                    Ensemble_Test=False
+                    ):
         """Run inference on a single image.
 
         Args:
@@ -345,6 +347,8 @@ class CascadeRCNN(BaseDetector, RPNTestMixin):
         '''
             集成其他模型的roi_feats
         '''
+        other_rois, other_roi_feats, other_bbox_pred, other_cls_score = Ensemble_load_tensor(img_metas)
+
         # 为了继续往下传获取预测框所对应的特征图
         final_bbox_feats = None
         # 级联结构,获取roi 而后抽取对应特征
@@ -387,11 +391,11 @@ class CascadeRCNN(BaseDetector, RPNTestMixin):
             scale_factor,
             rescale=rescale,
             cfg=rcnn_test_cfg,
-            Ensemble_Test=False,         # 多模型集成识别
-            save_mode=False,             # 表示开启识别图像并且保存模式, 保存：预测框、预测框对应特征图
-            roi_feats=final_bbox_feats,  # 自定义参数
-            img_metas = img_metas,       # 自定义参数
-            mode_name="CascadeRCNN"      # 模型名字
+            Ensemble_Test=Ensemble_Test,     # 多模型集成识别
+            save_mode=False,                 # 表示开启识别图像并且保存模式, 保存：预测框、预测框对应特征图
+            roi_feats=final_bbox_feats,      # 自定义参数
+            img_metas = img_metas,           # 自定义参数
+            mode_name="CascadeRCNN"          # 模型名字
         )
         bbox_result = bbox2result(det_bboxes, det_labels,
                                   self.bbox_head[-1].num_classes)
