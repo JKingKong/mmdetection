@@ -133,7 +133,11 @@ train_pipeline = [
          ),
     dict(type='Pad', size_divisor=32),
     dict(type='DefaultFormatBundle'),
-    dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels']),
+    dict(
+        type='Collect',
+        keys=['img', 'gt_bboxes', 'gt_labels'],
+        meta_keys=('filename', 'ori_shape', 'img_shape', 'img_norm_cfg',
+               'pad_shape', 'scale_factor'))
 ]
 # 设置albu的图像增强方式和参数
 # 查看文档：https://s0pypi0org.icopy.site/project/albumentations/      有像素级(不影响框)  空间级转换(影响框,所以要在上边加keymap 将操作映射到bbox上)

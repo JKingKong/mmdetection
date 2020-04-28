@@ -188,9 +188,9 @@ train_pipeline = [
     dict(type='Normalize', **img_norm_cfg),
     dict(type='DefaultFormatBundle'),
     dict(
-    type='Collect',
-    keys=['img', 'gt_bboxes', 'gt_labels', 'gt_masks'],
-    meta_keys=('filename', 'ori_shape', 'img_shape', 'img_norm_cfg',
+        type='Collect',
+        keys=['img', 'gt_bboxes', 'gt_labels'],
+        meta_keys=('filename', 'ori_shape', 'img_shape', 'img_norm_cfg',
                'pad_shape', 'scale_factor'))
 ]
 
