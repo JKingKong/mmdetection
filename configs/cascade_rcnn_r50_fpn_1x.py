@@ -297,7 +297,7 @@ lr_config = dict(
 checkpoint_config = dict(interval=1)
 # yapf:disable
 log_config = dict(
-    interval=5,             # 调整：50--->5
+    interval=20,             # 使用多少张图片就输出一次   100/808
     hooks=[
         dict(type='TextLoggerHook'),
         # dict(type='TensorboardLoggerHook')

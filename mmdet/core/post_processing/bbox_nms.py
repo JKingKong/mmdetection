@@ -113,9 +113,23 @@ def multiclass_nms(multi_bboxes,
     2、nms抑制
 
     '''
+    # 模型集成性能测试
     if Ensemble_Test == True:
-        Ensemble_bboxes_union()
-        Ensembel_bboxes_intersection()
+        bboxes,scores,labels = Ensemble_bboxes_union(
+            img_metas=img_metas,
+            mode_name=mode_name,
+            cur_bboxes=bboxes,
+            cur_scores=scores,
+            cur_labels=labels
+        )
+
+        # bboxes, scores, labels = Ensembel_bboxes_intersection(
+        #     img_metas=img_metas,
+        #     mode_name=mode_name,
+        #     cur_bboxes=bboxes,
+        #     cur_scores=scores,
+        #     cur_labels=labels
+        # )
 
 
     max_coordinate = bboxes.max()
@@ -139,9 +153,9 @@ def multiclass_nms(multi_bboxes,
 
 
     # 3、框数量超过设定值,则要按照置信度取Top-max_num
-    final_bboxes = bboxes.deepcopy()  # 要使用深拷贝
-    final_scores=scores.deepcopy()
-    final_labels=labels.deepcopy()
+    final_bboxes=bboxes # 要使用深拷贝
+    final_scores=scores
+    final_labels=labels
     top_max_inds = None
     if keep.size(0) > max_num:
         # 保存前 max_num个框
@@ -193,19 +207,18 @@ def multiclass_nms(multi_bboxes,
 
     return torch.cat([bboxes, scores[:, None]], 1), labels
 
-def save_tensor(   valid_mask = None,  # 过滤掉低分
+def save_tensor(valid_mask = None,  # 过滤掉低分
+               rois = None,         # 保存
+               roi_feats = None,    # 保存
+               bbox_pred = None,    # 保存
+               cls_score = None,    # 保存
+               bboxes=None,         # 保存
+               scores=None,          # 保存
+               labels=None,         # 保存
 
-                   rois = None,         # 保存
-                   roi_feats = None,    # 保存
-                   bbox_pred = None,    # 保存
-                   cls_score = None,    # 保存
-                   bboxes=None,         # 保存
-                   score=None,          # 保存
-                   labels=None,         # 保存
-
-                   top_max_inds=None, # 根据参数保留前top_max个框
-                   img_metas=None,
-                   mode_name=None
+               top_max_inds=None, # 根据参数保留前top_max个框
+               img_metas=None,
+               mode_name=None
                    ):
 
     # 自定义函数
@@ -237,7 +250,7 @@ def save_tensor(   valid_mask = None,  # 过滤掉低分
     final_bbox_pred = filter_low_score_bbox_pred
     final_cls_score = filter_low_score_cls_score
     final_bboxes = bboxes
-    final_score = score
+    final_scores = scores
     final_labels = labels
 
     # 2、去掉NMS抑制不通过的框
@@ -247,7 +260,7 @@ def save_tensor(   valid_mask = None,  # 过滤掉低分
         final_bbox_pred = filter_low_score_bbox_pred[top_max_inds]
         final_cls_score = filter_low_score_cls_score[top_max_inds]
         final_bboxes = final_bboxes[top_max_inds]
-        final_score = final_score[top_max_inds]
+        final_scores = final_scores[top_max_inds]
         final_labels = final_labels[top_max_inds]
 
 
@@ -260,6 +273,10 @@ def save_tensor(   valid_mask = None,  # 过滤掉低分
     save_path = "/content/drive/My Drive/detect-tensor/" + mode_name + "/"
     # img_metas[0]['filename']: 类似'/content/mmdetection/data/coco/val2017/Z107.jpg'
     images_name = img_metas[0]['filename'].split("/")[-1].split(".")[0]
+
+    '''
+    为了方便融合特征
+    '''
     # 保存框对应的rois(rois是用来作为roi_extractor的输入)张量
     save_path = save_path + images_name + "-rois.pt"
     torch.save(final_rois,save_path)
@@ -272,31 +289,84 @@ def save_tensor(   valid_mask = None,  # 过滤掉低分
     # 保存预测框分数
     save_path = save_path + images_name + "-cls_score.pt"
     torch.save(final_cls_score,save_path)
+
+    '''
+    为了方便使用自己编写的Ensemble_union 和 Ensemble_intersection函数
+    '''
     # 保存bboxes,为了方便使用自己编写的Ensemble_union 和 Ensemble_intersection函数
     save_path = save_path + images_name + "-bboxes.pt"
     torch.save(final_bboxes,save_path)
+
+    save_path = save_path + images_name + "-scores.pt"
+    torch.save(final_scores, save_path)
 
     save_path = save_path + images_name + "-labels.pt"
     torch.save(final_labels,save_path)
 
 def Ensemble_bboxes_union(
-                   bboxes=None,
                    img_metas=None,
-                   mode_name=None):
+                   mode_name=None,
+                   cur_bboxes=None,
+                   cur_scores=None,
+                   cur_labels=None
+                    ):
     '''
 
     :param img_metas:
     :param mode_name:
     :return: 不同模型检测框的并集,而后再经过NMS抑制最终返回结果
     '''
+    save_path = "/content/drive/My Drive/detect-tensor/" + mode_name + "/"
+
+    images_name = img_metas[0]['filename'].split("/")[-1].split(".")[0]
+    # 保存框对应的rois(rois是用来作为roi_extractor的输入)张量
+    # 1、读取其他模型的tensor
+    save_path = save_path + images_name + "-bboxes.pt"
+    other_bboxes = torch.load(save_path)
+
+    save_path = save_path + images_name + "-scores.pt"
+    other_scores = torch.load(save_path)
+
+    save_path = save_path + images_name + "-labels.pt"
+    other_labels = torch.load(save_path)
+
+    # 2、并集融合
+    bboxes = torch.cat((cur_bboxes,other_bboxes),0)
+    labels = torch.cat((cur_labels, other_labels), 0)
+    scores = torch.cat((cur_scores, other_scores), 0)
+
+    return bboxes,scores,labels
 
 def Ensembel_bboxes_intersection(
-                   bboxes=None,
-                   img_metas=None,
-                   mode_name=None):
+        img_metas=None,
+        mode_name=None,
+        cur_bboxes=None,
+        cur_scores=scores,
+        cur_labels=None):
     '''
 
      :param img_metas:
      :param mode_name:
      :return: 不同模型检测框的交集,而后再经过NMS抑制最终返回结果
      '''
+
+    save_path = "/content/drive/My Drive/detect-tensor/" + mode_name + "/"
+
+    images_name = img_metas[0]['filename'].split("/")[-1].split(".")[0]
+    # 保存框对应的rois(rois是用来作为roi_extractor的输入)张量
+    # 1、读取其他模型的tensor
+    save_path = save_path + images_name + "-bboxes.pt"
+    other_bboxes = torch.load(save_path)
+
+    save_path = save_path + images_name + "-scores.pt"
+    other_scores = torch.load(save_path)
+
+    save_path = save_path + images_name + "-labels.pt"
+    other_labels = torch.load(save_path)
+
+    # 2、交集融合
+    bboxes = torch.cat((cur_bboxes, other_bboxes), 0)
+    labels = torch.cat((cur_labels, other_labels), 0)
+    scores = torch.cat((cur_scores, other_scores), 0)
+
+    return bboxes, scores, labels
