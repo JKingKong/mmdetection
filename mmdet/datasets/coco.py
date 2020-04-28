@@ -16,23 +16,24 @@ from .registry import DATASETS
 @DATASETS.register_module
 class CocoDataset(CustomDataset):
 
-    # CLASSES = ('person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus',
-    #            'train', 'truck', 'boat', 'traffic_light', 'fire_hydrant',
-    #            'stop_sign', 'parking_meter', 'bench', 'bird', 'cat', 'dog',
-    #            'horse', 'sheep', 'cow', 'elephant', 'bear', 'zebra', 'giraffe',
-    #            'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee',
-    #            'skis', 'snowboard', 'sports_ball', 'kite', 'baseball_bat',
-    #            'baseball_glove', 'skateboard', 'surfboard', 'tennis_racket',
-    #            'bottle', 'wine_glass', 'cup', 'fork', 'knife', 'spoon', 'bowl',
-    #            'banana', 'apple', 'sandwich', 'orange', 'broccoli', 'carrot',
-    #            'hot_dog', 'pizza', 'donut', 'cake', 'chair', 'couch',
-    #            'potted_plant', 'bed', 'dining_table', 'toilet', 'tv', 'laptop',
-    #            'mouse', 'remote', 'keyboard', 'cell_phone', 'microwave',
-    #            'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock',
-    #            'vase', 'scissors', 'teddy_bear', 'hair_drier', 'toothbrush')
-    CLASSES = ('yolk')
+    CLASSES = ('person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus',
+               'train', 'truck', 'boat', 'traffic_light', 'fire_hydrant',
+               'stop_sign', 'parking_meter', 'bench', 'bird', 'cat', 'dog',
+               'horse', 'sheep', 'cow', 'elephant', 'bear', 'zebra', 'giraffe',
+               'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee',
+               'skis', 'snowboard', 'sports_ball', 'kite', 'baseball_bat',
+               'baseball_glove', 'skateboard', 'surfboard', 'tennis_racket',
+               'bottle', 'wine_glass', 'cup', 'fork', 'knife', 'spoon', 'bowl',
+               'banana', 'apple', 'sandwich', 'orange', 'broccoli', 'carrot',
+               'hot_dog', 'pizza', 'donut', 'cake', 'chair', 'couch',
+               'potted_plant', 'bed', 'dining_table', 'toilet', 'tv', 'laptop',
+               'mouse', 'remote', 'keyboard', 'cell_phone', 'microwave',
+               'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock',
+               'vase', 'scissors', 'teddy_bear', 'hair_drier', 'toothbrush')
+    # CLASSES = ('yolk')
 
     def load_annotations(self, ann_file):
+        # 调用pycocotools,载入注释文件
         self.coco = COCO(ann_file)
         self.cat_ids = self.coco.getCatIds()
         self.cat2label = {
@@ -57,11 +58,15 @@ class CocoDataset(CustomDataset):
         """Filter images too small or without ground truths."""
         valid_inds = []
         ids_with_ann = set(_['image_id'] for _ in self.coco.anns.values())
+        count = 0
         for i, img_info in enumerate(self.img_infos):
             if self.filter_empty_gt and self.img_ids[i] not in ids_with_ann:
+                print("过滤未标注images")
                 continue
             if min(img_info['width'], img_info['height']) >= min_size:
+                count = count + 1
                 valid_inds.append(i)
+        print("大于min_size的图片数：",count)
         return valid_inds
 
     def _parse_ann_info(self, img_info, ann_info):

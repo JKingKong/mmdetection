@@ -62,8 +62,9 @@ def build_from_cfg(cfg, registry, default_args=None):
     assert isinstance(cfg, dict) and 'type' in cfg
     assert isinstance(default_args, dict) or default_args is None
     args = cfg.copy()
-    obj_type = args.pop('type')
+    obj_type = args.pop('type') # 取出type的值
     if mmcv.is_str(obj_type):
+        # 　从注册器里面取出type，注册过才能用（注册器其实就是一种装饰器，之后看到再说）
         obj_cls = registry.get(obj_type)
         if obj_cls is None:
             raise KeyError('{} is not in the {} registry'.format(
@@ -76,4 +77,4 @@ def build_from_cfg(cfg, registry, default_args=None):
     if default_args is not None:
         for name, value in default_args.items():
             args.setdefault(name, value)
-    return obj_cls(**args)
+    return obj_cls(**args) #　就是type定义的那个类的实例化，返回了这个类的对象

@@ -209,4 +209,3 @@ class SharedFCBBoxHead(ConvFCBBoxHead):
             fc_out_channels=fc_out_channels,
             *args,
             **kwargs)
-        print("=============== user the SharedFCBBoxHead")

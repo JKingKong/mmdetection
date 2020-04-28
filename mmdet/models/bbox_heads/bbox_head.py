@@ -142,9 +142,14 @@ class BBoxHead(nn.Module):
                        bbox_pred,
                        img_shape,
                        scale_factor,
-                       roi_feats=None, # 新加入的参数   为了得到预测框所对应的map
                        rescale=False,
-                       cfg=None):
+                       cfg=None,
+                       Ensemble_Test = False,   # 识别图片时的是否使用多模型集成识别？
+                       save_mode=False,         # 表示开启识别图像并且保存模式, 保存：预测框、预测框对应特征图
+                       roi_feats=None,          # 新加入的参数   为了得到预测框所对应的map
+                       img_metas=None,
+                       mode_name=None
+                       ):
         cls_score_for_load = cls_score
         if isinstance(cls_score, list):
             cls_score = sum(cls_score) / float(len(cls_score))
@@ -178,10 +183,14 @@ class BBoxHead(nn.Module):
             det_bboxes, det_labels = multiclass_nms(bboxes, scores,
                                                     cfg.score_thr, cfg.nms,
                                                     cfg.max_per_img,
+                                                    Ensemble_Test=Ensemble_Test,    # 识别图片时的是否使用多模型集成识别？
+                                                    save_mode=save_mode,  # 表示开启识别图像并且保存模式, 保存：预测框、预测框对应特征图
                                                     rois = rois,
                                                     cls_score = cls_score_for_load,
                                                     bbox_pred = bbox_pred,
-                                                    roi_feats=roi_feats  # 新加入的参数   为了得到预测框所对应的map
+                                                    roi_feats=roi_feats,             # 新加入的参数   为了得到预测框所对应的map
+                                                    img_metas=img_metas,
+                                                    mode_name=mode_name
                                                     )
             # print("------------------------------------bbox_head.py--------------------------------------------------")
             # print("===bboxes:", bboxes.shape)

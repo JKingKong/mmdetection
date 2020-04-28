@@ -6,6 +6,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 
+'''
+python tools/analyze_logs.py plot_curve json/20200426_101118.log.json --key loss_rpn_cls loss_rpn_bbox  --legend loss_rpn_cls loss_rpn_bbox 
+python tools/analyze_logs.py plot_curve json/20200426_101118.log.json --key loss_cls loss_bbox loss --legend  loss_cls loss_bbox loss
+python tools/analyze_logs.py plot_curve json/20200426_101118.log.json --key acc --legend acc
+# 下边这条命令要对log.json文件进行修改 把含有bbox_mAP的字段拿出来才行
+python tools/analyze_logs.py plot_curve json/formAP.json --key bbox_mAP --legend bbox_mAP 
+
+'''
 
 def cal_train_time(log_dicts, args):
     for i, log_dict in enumerate(log_dicts):

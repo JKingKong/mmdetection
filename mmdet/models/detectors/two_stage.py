@@ -28,8 +28,17 @@ class TwoStageDetector(BaseDetector, RPNTestMixin, BBoxTestMixin,
                  mask_head=None,
                  train_cfg=None,
                  test_cfg=None,
-                 pretrained=None):
+                 pretrained=None,
+                 mode_name=None
+                 ):
         super(TwoStageDetector, self).__init__()
+
+        self.mode_name = mode_name
+        # 上来一波build，这里和之前的build没什么区别，在注册器里面去除对应的type类型，然后返回一个对象，以后就可以肆意调用里面的功能了
+        # 这里build了backbone, neck, shared_head, rpn_head,bbox_head,mask_head（如果有）
+        # backbone,主干网络用的啥，譬如resnet50, resnext101之类的
+        # neck 一般是FPN,需要指定很多参数，譬如用哪些feature map,之后会详细说
+        # rpn_head继承了anchor_head，是ｒｐｎ的核心功能
         self.backbone = builder.build_backbone(backbone)
 
         if neck is not None:
@@ -88,6 +97,7 @@ class TwoStageDetector(BaseDetector, RPNTestMixin, BBoxTestMixin,
 
     def extract_feat(self, img):
         """Directly extract features from the backbone+neck
+        #　前向backbone 和　neck的函数
         """
         x = self.backbone(img)
         if self.with_neck:
@@ -127,7 +137,7 @@ class TwoStageDetector(BaseDetector, RPNTestMixin, BBoxTestMixin,
             outs = outs + (mask_pred, )
         return outs
 
-    def forward_train(self,
+    def forward_train(self, #　核心双阶段检测器的流程
                       img,
                       img_metas,
                       gt_bboxes,
@@ -147,7 +157,7 @@ class TwoStageDetector(BaseDetector, RPNTestMixin, BBoxTestMixin,
                 `mmdet/datasets/pipelines/formatting.py:Collect`.
 
             gt_bboxes (list[Tensor]): each item are the truth boxes for each
-                image in [tl_x, tl_y, br_x, br_y] format.
+                image in [tl_x, tl_y, br_x, br_y] format(left top point, right bottom point).
 
             gt_labels (list[Tensor]): class indices corresponding to each box
 
@@ -163,15 +173,21 @@ class TwoStageDetector(BaseDetector, RPNTestMixin, BBoxTestMixin,
         Returns:
             dict[str, Tensor]: a dictionary of loss components
         """
+        # 　前向　backbone 和　neck
         x = self.extract_feat(img)
 
         losses = dict()
 
         # RPN forward and loss
         if self.with_rpn:
+            # rpn_head在上面__init__函数里面build了,返回了rpn_head对象，
+            # 但是因为都继承了nn.Module(实现了__call__)，可以直接用实例名字调用里面的forward函数，从而进行了前向传播
+
             rpn_outs = self.rpn_head(x)
             rpn_loss_inputs = rpn_outs + (gt_bboxes, img_metas,
                                           self.train_cfg.rpn)
+            # 这里loss是rpn_head里面的实现了，因为rpn_head继承了anchor_head，
+            # 所以用了父类anchor_head实现的loss，其实就是anchor的那一套，返回是一个字典
             rpn_losses = self.rpn_head.loss(
                 *rpn_loss_inputs, gt_bboxes_ignore=gt_bboxes_ignore)
             losses.update(rpn_losses)
@@ -179,6 +195,7 @@ class TwoStageDetector(BaseDetector, RPNTestMixin, BBoxTestMixin,
             proposal_cfg = self.train_cfg.get('rpn_proposal',
                                               self.test_cfg.rpn)
             proposal_inputs = rpn_outs + (img_metas, proposal_cfg)
+            # 得到proposal,把ａｎｃｈｏｒ转化为对应的框的信息，然后ＮＭＳ再取top-N个候选框
             proposal_list = self.rpn_head.get_bboxes(*proposal_inputs)
         else:
             proposal_list = proposals
@@ -306,10 +323,14 @@ class TwoStageDetector(BaseDetector, RPNTestMixin, BBoxTestMixin,
 
         # 调用mmdet/models/detectors/test_mixins.py 里的simple_test_mask()
         # 获取框(x,y,w,h,置信度)和类标签
+        # 科学计数法
         det_bboxes, det_labels = self.simple_test_bboxes(
-            x, img_metas, proposal_list, self.test_cfg.rcnn, rescale=rescale)
+            x, img_metas, proposal_list, self.test_cfg.rcnn, rescale=rescale,
+            mode_name=self.mode_name
+        )
 
         # 返回一个列表,不是tensor
+        # 用浮点数表示，且是一个列表
         bbox_results = bbox2result(det_bboxes, det_labels,
                                    self.bbox_head.num_classes)
         # import sys

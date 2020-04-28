@@ -43,6 +43,7 @@ def parse_losses(losses):
             raise TypeError(
                 '{} is not a tensor or list of tensors'.format(loss_name))
 
+    # 求和
     loss = sum(_value for _key, _value in log_vars.items() if 'loss' in _key)
 
     log_vars['loss'] = loss
@@ -55,6 +56,7 @@ def parse_losses(losses):
 
     return loss, log_vars
 
+# 处理一个batch必要的参数，构建的模型以及传进去的batch_size的数据
 
 def batch_processor(model, data, train_mode):
     """Process a data batch.
@@ -72,7 +74,12 @@ def batch_processor(model, data, train_mode):
     Returns:
         dict: A dict containing losses and log vars.
     """
+    # 这边model就是我们之前构建的双阶段检测器，builder返回的是类的对象，
+    # 因为继承了nn.Module，所以可以直接通过对象加()来调用__call__里面实现的forward函数
+    # 也就是我们前几次讲的整个过程是在这里真正执行前向操作的
     losses = model(**data)
+
+    # 这边对loss进行一些处理
     loss, log_vars = parse_losses(losses)
 
     outputs = dict(
@@ -91,6 +98,7 @@ def train_detector(model,
     logger = get_root_logger(cfg.log_level)
 
     # prepare data loaders
+    # 准备数据载入
     dataset = dataset if isinstance(dataset, (list, tuple)) else [dataset]
     data_loaders = [
         build_dataloader(
@@ -119,6 +127,7 @@ def train_detector(model,
 
     # build runner
     optimizer = build_optimizer(model, cfg.optimizer)
+    # 构建数据加载器
     runner = Runner(
         model,
         batch_processor,
@@ -162,4 +171,5 @@ def train_detector(model,
         runner.resume(cfg.resume_from)
     elif cfg.load_from:
         runner.load_checkpoint(cfg.load_from)
+    # 数据加载器  运行模型
     runner.run(data_loaders, cfg.workflow, cfg.total_epochs)

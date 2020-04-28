@@ -102,7 +102,7 @@ class DoubleConvFCBBoxHead(BBoxHead):
         self.conv_cfg = conv_cfg
         self.norm_cfg = norm_cfg
 
-        # increase the channel of input features
+        # increase the channel of input features  残差块
         self.res_block = BasicResBlock(self.in_channels,
                                        self.conv_out_channels)
 
@@ -122,6 +122,7 @@ class DoubleConvFCBBoxHead(BBoxHead):
         branch_convs = nn.ModuleList()
         for i in range(self.num_convs):
             branch_convs.append(
+                # 加入残差瓶颈块
                 Bottleneck(
                     inplanes=self.conv_out_channels,
                     planes=self.conv_out_channels // 4,
@@ -152,13 +153,16 @@ class DoubleConvFCBBoxHead(BBoxHead):
         # conv head
         x_conv = self.res_block(x_reg)
 
+        # 通过的几个连续卷积
         for conv in self.conv_branch:
             x_conv = conv(x_conv)
 
+        # 平均池化
         if self.with_avg_pool:
             x_conv = self.avg_pool(x_conv)
-
+        #
         x_conv = x_conv.view(x_conv.size(0), -1)
+        # bbox回归
         bbox_pred = self.fc_reg(x_conv)
 
         # fc head

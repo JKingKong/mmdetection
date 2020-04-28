@@ -34,7 +34,7 @@ def nms(dets, iou_thr, device_id=None):
         >>> assert len(inds) == len(suppressed) == 3
     """
     # convert dets (tensor or numpy array) to tensor
-    # 类型转换,保证dets是tensor类型
+    # 1、是numpy类型还是tensor类型,
     if isinstance(dets, torch.Tensor):
         is_numpy = False
         dets_th = dets
@@ -48,17 +48,21 @@ def nms(dets, iou_thr, device_id=None):
                 type(dets)))
 
     # execute cpu or cuda nms
+    # 2、按照nms抑制逻辑,计算需要保留下来的框的行索引idns
     if dets_th.shape[0] == 0:
+        # 如果行数为0则inds为0
         inds = dets_th.new_zeros(0, dtype=torch.long)
     else:
-        if dets_th.is_cuda:
+        if dets_th.is_cuda: # 根据设备不同计算 计算速度不同,结果相同
+            # GPU
             inds = nms_cuda.nms(dets_th, iou_thr)
         else:
+            # CPU
             inds = nms_cpu.nms(dets_th, iou_thr)
 
     if is_numpy:
         inds = inds.cpu().numpy()
-    # 按照索引inds,保留dets的对应行
+    # 3、返回索引inds,保留下来的dets对应行
     return dets[inds, :], inds
 
 

@@ -62,8 +62,14 @@ def parse_args():
 
 
 def main():
+
+    '''
+    # 1、设定和读取各种配置；
+    :return:
+    '''
     args = parse_args()
 
+    #cfg： configs/*.py文件里的参数
     cfg = Config.fromfile(args.config)
     # set cudnn_benchmark
     if cfg.get('cudnn_benchmark', False):
@@ -120,11 +126,27 @@ def main():
     cfg.seed = args.seed
     meta['seed'] = args.seed
 
+    '''
+    # 2、创建模型
+    第一个参数cfg.model模型配置里面必须要有一个种类type，包括经典的算法如Faster RCNN, MaskRCNN等
+    其次，还包含几个部分，如backbone, neck, head
+    backbone有深度，stage等信息，如resnet50对应着3,4,6,3四个重复stages
+    neck一般FPN(feature pyramid network)，需要指定num_outs几个输出之类的信息（之后会看到）
+    head 就是具体到上层rpn_head,　shared_head，　bbox_head之类的
+    如果不清楚我们可以去某个config里面验证一下
+    返回的是一个类的对象，详见下面的build函数
+    :return: 
+    '''
     model = build_detector(
         cfg.model, train_cfg=cfg.train_cfg, test_cfg=cfg.test_cfg)
 
+
+    '''
+    # 3、创建数据集（使用configs下的py文件里的data字典的train字段）
+    :return: 
+    '''
     datasets = [build_dataset(cfg.data.train)]
-    if len(cfg.workflow) == 2:
+    if len(cfg.workflow) == 2:#是否添加验证集
         val_dataset = copy.deepcopy(cfg.data.val)
         val_dataset.pipeline = cfg.data.train.pipeline
         datasets.append(build_dataset(val_dataset))
@@ -137,6 +159,13 @@ def main():
             CLASSES=datasets[0].CLASSES)
     # add an attribute for visualization convenience
     model.CLASSES = datasets[0].CLASSES
+
+    #现在的问题cfg不知道怎么搞
+    # cfg： configs/*.py文件里的参数
+    '''
+    # 4、将模型，数据集和配置传进训练函数
+    :return: 
+    '''
     train_detector(
         model,
         datasets,

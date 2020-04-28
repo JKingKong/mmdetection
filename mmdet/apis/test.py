@@ -10,25 +10,32 @@ from mmcv.runner import get_dist_info
 
 
 def single_gpu_test(model, data_loader, show=False):
-    # 设置为非训练模式
+    # 1、设置为评价模式(使用验证集)
     model.eval()
     results = []
     dataset = data_loader.dataset
     prog_bar = mmcv.ProgressBar(len(dataset))
+    # 对于每张图
     for i, data in enumerate(data_loader):
-        with torch.no_grad():
+        with torch.no_grad(): # 不需要梯度模式
             # 开始使用模型进行识别   调用
             # 当前model对象的类型是：MMDataParallel
-            # 调用了MMDataParallel类型对象的爷爷方法__call__
+            # 实现了__call__方法,所以可以直接这样像函数一样使用
+            # return_loss=False取消梯度计算
             result = model(return_loss=False, rescale=not show, **data)
+        # 识别完一张图,加入结果列表
         results.append(result)
 
         if show:
+            # 识别结果可视化
             model.module.show_result(data, result)
 
+        # 移位batch_size是什么？？？
         batch_size = data['img'][0].size(0)
         for _ in range(batch_size):
+            # 更新进度条
             prog_bar.update()
+    # 返回结果列表
     return results
 
 

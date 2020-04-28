@@ -68,7 +68,7 @@ class visualize_mmdetection():
 
 
 if __name__ == '__main__':
-    path = 'D:\\JKingKong\\_毕业论文\\mmdetection-master\\20200419_130242.log.json'
+    path = 'D:\\JKingKong\\mmdetection-master\\json\\20200426_101118.log.json'
     x = visualize_mmdetection(sys.argv[1])
     # x = visualize_mmdetection(path)
 

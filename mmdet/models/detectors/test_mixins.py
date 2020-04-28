@@ -99,12 +99,17 @@ class BBoxTestMixin(object):
                            img_metas,
                            proposals,
                            rcnn_test_cfg,
-                           rescale=False):
+                           rescale=False,
+                           mode_name=None
+                           ):
         ####====================================================================================
         """Test only det bboxes without augmentation."""
+        '''
+        此处可以载入其他模型的roi、roi_feats  进行特征加入融合
+        '''
         rois = bbox2roi(proposals)
         # 调用 mmdet/models/roi_extractors/single_level.py 下得到
-        # 得到roi_feats
+        # 1、得到roi_feats
         roi_feats = self.bbox_roi_extractor(
             x[:len(self.bbox_roi_extractor.featmap_strides)], rois)
         if self.with_shared_head:
@@ -114,16 +119,14 @@ class BBoxTestMixin(object):
         # mmdet/models/bbox_heads/convfc_bbox_head.py  下的forward方法的返回值 分类过后的分数,回归框后的参数
         # cls_score的shape: box数 * 2 (第0列是背景分数,会被直接忽略)
         # bbox_pred的shape：box数 * 8
-
-        #读取文件的roi
-        #roi_feats = torch.load("/content/mmdetection/Z108_roi_feats.pt")
-        #roi_feats = torch.load("/content/mmdetection/Z108_roi_feats.pt")
-
+        '''
+        此处可以载入其他模型的roi_feats 进行 特征加入融合
+        '''
         cls_score, bbox_pred = self.bbox_head(roi_feats)
         img_shape = img_metas[0]['img_shape']
         scale_factor = img_metas[0]['scale_factor']
 
-        # 载入张量
+        # 载入roi_feats张量(已完成小score过滤,nms抑制)
         # root_path = "/content/mmdetection/"
         # picture_name = "Z108"
         # save_path = root_path + picture_name + "_filter_final_roi_feats.pt"
@@ -136,15 +139,36 @@ class BBoxTestMixin(object):
         # cls_score = torch.load(save_path)
 
         # det_bboxes的shape:NMS抑制后的数量 * 5
+        '''
+        # print(img_metas)
+        此处可以传入img_metas:
+        [{
+            'filename': '/content/mmdetection/data/coco/val2017/Z107.jpg',
+            'ori_shape': (720, 1280, 3),
+            'img_shape': (750, 1333, 3),
+            'pad_shape': (768, 1344, 3),
+            'scale_factor': 1.04140625,
+            'flip': False,
+            'img_norm_cfg': {
+                'mean': array([123.675, 116.28, 103.53], dtype = float32),
+                'std': array([58.395, 57.12, 57.375], dtype = float32),
+                'to_rgb': True
+            }
+        }]
+        '''
         det_bboxes, det_labels = self.bbox_head.get_det_bboxes(
             rois,               # 原来的参数 必须保证load的.pt文件和这个维度一致，所以这里也需要保存后load
             cls_score,          # 原来的参数 必须保证load的.pt文件和这个维度一致，所以这里也需要保存后load
             bbox_pred,          # 原来的参数 必须保证load的.pt文件和这个维度一致，所以这里也需要保存后load
             img_shape,
             scale_factor,
-            roi_feats=roi_feats, # 新加入的参数   为了得到预测框所对应的map
             rescale=rescale,
-            cfg=rcnn_test_cfg)
+            cfg=rcnn_test_cfg,
+            save_mode=False,
+            roi_feats=roi_feats,  # 新加入的参数   为了得到预测框所对应的特征图
+            img_metas=img_metas,
+            mode_name=mode_name
+            )
         # print()
         # print("===================****************=====================")
         # print("--- current function from ", sys._getframe().f_code.co_filename)

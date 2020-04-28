@@ -103,14 +103,15 @@ class CascadeRCNN(BaseDetector, RPNTestMixin):
             self.rpn_head.init_weights()
         if self.with_shared_head:
             self.shared_head.init_weights(pretrained=pretrained)
-        for i in range(self.num_stages):
+        for i in range(self.num_stages):  # 初始化设置的几个bbox
             if self.with_bbox:
                 self.bbox_roi_extractor[i].init_weights()
                 self.bbox_head[i].init_weights()
             if self.with_mask:
                 if not self.share_roi_extractor:
+                    # 如果不共享roi_extractor,则自己按照配置文件里的构建mask_roi_extractor
                     self.mask_roi_extractor[i].init_weights()
-                self.mask_head[i].init_weights()
+                self.mask_head[i].init_weights()  # 在cascade_mask_rcnn有mask_head时使用, 有几个bbox就初始化几个 mask
 
     def extract_feat(self, img):
         x = self.backbone(img)
@@ -119,6 +120,10 @@ class CascadeRCNN(BaseDetector, RPNTestMixin):
         return x
 
     def forward_dummy(self, img):
+        """Used for computing network flops.
+
+        See `mmdetection/tools/get_flops.py`
+        """
         outs = ()
         # backbone
         x = self.extract_feat(img)
@@ -317,8 +322,10 @@ class CascadeRCNN(BaseDetector, RPNTestMixin):
         Returns:
             dict: results
         """
+        #   经过残差网络 和 FPN后获得的 特征图
         x = self.extract_feat(img)
 
+        # 经过rpn网络,获取建议框列表 (或者选择覆盖当前建议框)
         proposal_list = self.simple_test_rpn(
             x, img_metas,
             self.test_cfg.rpn) if proposals is None else proposals
@@ -327,31 +334,46 @@ class CascadeRCNN(BaseDetector, RPNTestMixin):
         ori_shape = img_metas[0]['ori_shape']
         scale_factor = img_metas[0]['scale_factor']
 
-        # "ms" in variable names means multi-stage
+        # "ms" in variable names means multi-stage   级联结果
         ms_bbox_result = {}
         ms_segm_result = {}
         ms_scores = []
         rcnn_test_cfg = self.test_cfg.rcnn
 
+        # rois: 符合bbox_roi_extractor输入参数的建议框格式
         rois = bbox2roi(proposal_list)
+        # 为了继续往下传获取预测框所对应的特征图
+        final_bbox_feats = None
+        # 级联结构,获取roi 而后抽取对应特征
         for i in range(self.num_stages):
+            # 第i个bbox的 roi_extractor 抽取器
             bbox_roi_extractor = self.bbox_roi_extractor[i]
+            # 第i个bbox的 head
             bbox_head = self.bbox_head[i]
 
+            # 建议框roi后的特征
             bbox_feats = bbox_roi_extractor(
                 x[:len(bbox_roi_extractor.featmap_strides)], rois)
+            final_bbox_feats = bbox_feats
             if self.with_shared_head:
+                # 若设置了shared_head则使用
                 bbox_feats = self.shared_head(bbox_feats)
 
+            # 进行分类 和 框回归
             cls_score, bbox_pred = bbox_head(bbox_feats)
+
+            # 此级结果加入ms_scores
             ms_scores.append(cls_score)
 
-            if i < self.num_stages - 1:
+            if i < self.num_stages - 1: # 如果使用的是级联结构
                 bbox_label = cls_score.argmax(dim=1)
+                # 传入当前级数得到的回归框, 以当前回归框 计算其roi,将这个roi传入下一级模块 (这样的效果就会使得回归框不断接近真实框)
                 rois = bbox_head.regress_by_class(rois, bbox_label, bbox_pred,
                                                   img_metas[0])
-
+        # 得到级联结构的得到平均 cls_score
         cls_score = sum(ms_scores) / self.num_stages
+
+        # 获得det
         det_bboxes, det_labels = self.bbox_head[-1].get_det_bboxes(
             rois,
             cls_score,
@@ -359,12 +381,19 @@ class CascadeRCNN(BaseDetector, RPNTestMixin):
             img_shape,
             scale_factor,
             rescale=rescale,
-            cfg=rcnn_test_cfg)
+            cfg=rcnn_test_cfg,
+            Ensemble_Test=False,         # 多模型集成识别
+            save_mode=False,             # 表示开启识别图像并且保存模式, 保存：预测框、预测框对应特征图
+            roi_feats=final_bbox_feats,  # 自定义参数
+            img_metas = img_metas,       # 自定义参数
+            mode_name="CascadeRCNN"      # 模型名字
+        )
         bbox_result = bbox2result(det_bboxes, det_labels,
                                   self.bbox_head[-1].num_classes)
         ms_bbox_result['ensemble'] = bbox_result
 
         if self.with_mask:
+            # cascade_mask_rcnn时用到此分支
             if det_bboxes.shape[0] == 0:
                 mask_classes = self.mask_head[-1].num_classes - 1
                 segm_result = [[] for _ in range(mask_classes)]

@@ -6,12 +6,12 @@ from .registry import (BACKBONES, DETECTORS, HEADS, LOSSES, NECKS,
 
 
 def build(cfg, registry, default_args=None):
-    if isinstance(cfg, list):
+    if isinstance(cfg, list):   # 传进来的cfg.model是一个字典，不走这条路
         modules = [
             build_from_cfg(cfg_, registry, default_args) for cfg_ in cfg
         ]
         return nn.Sequential(*modules)
-    else:
+    else:           # 所以调用的是build_from_cfg这个函数
         return build_from_cfg(cfg, registry, default_args)
 
 

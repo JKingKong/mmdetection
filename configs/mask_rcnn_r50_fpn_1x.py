@@ -1,6 +1,6 @@
 # model settings
 model = dict(
-    type='MaskRCNN',
+    type='MaskRCNN',# 上面说道，tools/train.py里的第三步build_detector返回的是一个type名字对应的类的对象，我们先来看一个config:
     pretrained='torchvision://resnet50',
     backbone=dict(
         type='ResNet',
@@ -125,7 +125,7 @@ train_pipeline = [
     dict(type='Normalize', **img_norm_cfg),
     dict(type='Pad', size_divisor=32),
     dict(type='DefaultFormatBundle'),
-    dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels', 'gt_masks']),
+    dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels','gt_masks']),
 ]
 test_pipeline = [
     dict(type='LoadImageFromFile'),
@@ -142,6 +142,18 @@ test_pipeline = [
             dict(type='Collect', keys=['img']),
         ])
 ]
+
+val_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='LoadAnnotations', with_bbox=True, with_mask=True),
+    dict(type='Resize', img_scale=(1333, 800), keep_ratio=True),
+    dict(type='RandomFlip', flip_ratio=0.0),
+    dict(type='Normalize', **img_norm_cfg),
+    dict(type='Pad', size_divisor=32),
+    dict(type='DefaultFormatBundle'),
+    dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels', 'gt_masks']),
+]
+
 data = dict(
     imgs_per_gpu=2,
     workers_per_gpu=2,
@@ -171,7 +183,7 @@ lr_config = dict(
     warmup_iters=500,
     warmup_ratio=1.0 / 3,
     step=[8, 11])
-checkpoint_config = dict(interval=20)
+checkpoint_config = dict(interval=1)
 # yapf:disable
 log_config = dict(
     interval=50,

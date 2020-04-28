@@ -3,7 +3,7 @@ from .two_stage import TwoStageDetector
 
 
 @DETECTORS.register_module
-class FasterRCNN(TwoStageDetector):
+class FasterRCNN(TwoStageDetector):#继承了双阶段的检测器TwoStageDetector，MASKRCNN也继承了它
 
     def __init__(self,
                  backbone,
@@ -14,8 +14,10 @@ class FasterRCNN(TwoStageDetector):
                  test_cfg,
                  neck=None,
                  shared_head=None,
-                 pretrained=None):
-        super(FasterRCNN, self).__init__(
+                 pretrained=None,
+                 mode_name="FasterRCNN"
+                 ):
+        super(FaslisterRCNN, self).__init__(
             backbone=backbone,
             neck=neck,
             shared_head=shared_head,
@@ -24,4 +26,6 @@ class FasterRCNN(TwoStageDetector):
             bbox_head=bbox_head,
             train_cfg=train_cfg,
             test_cfg=test_cfg,
-            pretrained=pretrained)
+            pretrained=pretrained,
+            mode_name="FasterRCNN"
+        )

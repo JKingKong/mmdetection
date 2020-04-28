@@ -104,6 +104,7 @@ def main():
     if args.out is not None and not args.out.endswith(('.pkl', '.pickle')):
         raise ValueError('The output file must be a pkl file.')
 
+    # 1、获取命令行输入的参数
     cfg = mmcv.Config.fromfile(args.config)
     # set cudnn_benchmark
     if cfg.get('cudnn_benchmark', False):
@@ -112,15 +113,20 @@ def main():
     cfg.data.test.test_mode = True
 
     # init distributed env first, since logger depends on the dist info.
+    # 是否使用分布式
     if args.launcher == 'none':
         distributed = False
     else:
         distributed = True
         init_dist(args.launcher, **cfg.dist_params)
 
+    # 2、数据集准备
+
     # build the dataloader
     # TODO: support multiple images per gpu (only minor changes are needed)
+    # 构建测试集数据加载器
     dataset = build_dataset(cfg.data.test)
+    # 构建测试集数据加载器
     data_loader = build_dataloader(
         dataset,
         imgs_per_gpu=1,
@@ -128,12 +134,14 @@ def main():
         dist=distributed,
         shuffle=False)
 
+
     # build the model and load checkpoint
-    # 根据配置文件 和 保存点建立模型
+    # 3、根据配置文件 和 保存点建立模型
     model = build_detector(cfg.model, train_cfg=None, test_cfg=cfg.test_cfg)
     fp16_cfg = cfg.get('fp16', None)
     if fp16_cfg is not None:
         wrap_fp16_model(model)
+    #保存点
     checkpoint = load_checkpoint(model, args.checkpoint, map_location='cpu')
     if args.fuse_conv_bn:
         model = fuse_module(model)
@@ -144,11 +152,12 @@ def main():
     else:
         model.CLASSES = dataset.CLASSES
 
+    # 4、使用GPU开始进行test
     if not distributed:
-        # 获得识别模型
+        # 模型加载到单GPU
         # MMDataParallel 继承 DataParallel,而DataParallel 继承 Module
         model = MMDataParallel(model, device_ids=[0])
-        # 单GPU
+        # 测试函数
         outputs = single_gpu_test(model, data_loader, args.show)
     else:
         # 分布式
