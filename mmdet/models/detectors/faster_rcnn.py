@@ -17,7 +17,7 @@ class FasterRCNN(TwoStageDetector):#继承了双阶段的检测器TwoStageDetect
                  pretrained=None,
                  mode_name="FasterRCNN"
                  ):
-        super(FaslisterRCNN, self).__init__(
+        super(FasterRCNN, self).__init__(
             backbone=backbone,
             neck=neck,
             shared_head=shared_head,
