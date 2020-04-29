@@ -8,6 +8,7 @@ import numpy as np
 def print_coco_results(results):
 
     def _print(result, ap=1, iouThr=None, areaRng='all', maxDets=100):
+        # 验证时打印的矩阵
         iStr = ' {:<18} {} @[ IoU={:<9} | \
         area={:>6s} | maxDets={:>3d} ] = {:0.3f}'
 

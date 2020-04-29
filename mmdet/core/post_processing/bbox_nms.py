@@ -154,7 +154,7 @@ def multiclass_nms(multi_bboxes,
 
     # 3、框数量超过设定值,则要按照置信度取Top-max_num
     # bboxes、scores、labels已经过nms抑制
-    final_bboxes=bboxes # 要使用深拷贝
+    final_bboxes=bboxes
     final_scores=scores
     final_labels=labels
     top_max_inds = None
