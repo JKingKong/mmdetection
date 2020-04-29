@@ -350,7 +350,7 @@ def Ensembel_bboxes_intersection(
         img_metas=None,
         mode_name=None,
         cur_bboxes=None,
-        cur_scores=scores,
+        cur_scores=None,
         cur_labels=None):
     '''
 
