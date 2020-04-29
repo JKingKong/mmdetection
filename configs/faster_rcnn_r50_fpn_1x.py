@@ -165,7 +165,7 @@ albu_train_transforms = [
 train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='LoadAnnotations', with_bbox=True),
-    dict(type='Resize', img_scale=[(1333, 800),(2666,1600)], keep_ratio=True),  # 多尺度训练 放大图片 以提升小物体检测精度
+    dict(type='Resize', img_scale=(1333, 800), keep_ratio=True),  # 多尺度训练 放大图片 以提升小物体检测精度
     dict(type='RandomFlip', flip_ratio=0.5),                                    # 训练时数据增强 参考mmdet/datasets/transform.py
     dict(type='Normalize', **img_norm_cfg),
 
