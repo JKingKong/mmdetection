@@ -99,9 +99,9 @@ class TwoStageDetector(BaseDetector, RPNTestMixin, BBoxTestMixin,
         """Directly extract features from the backbone+neck
         #　前向backbone 和　neck的函数
         """
-        x = self.backbone(img)
+        x = self.backbone(img) # bcakbone
         if self.with_neck:
-            x = self.neck(x)
+            x = self.neck(x)   # neck
         return x
 
     def forward_dummy(self, img):

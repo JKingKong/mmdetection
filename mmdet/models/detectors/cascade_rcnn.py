@@ -356,10 +356,13 @@ class CascadeRCNN(BaseDetector, RPNTestMixin):
         '''
             获取其他模型的rois,roi_feats,bbox_pred,cls_score
         '''
-        other_rois, other_roi_feats, other_bbox_pred, other_cls_score = self.Ensemble_load_tensor(img_metas)
+        other_rois, other_roi_feats, other_bbox_pred, other_cls_score = None, None, None, None
+        if Ensemble_Test==True:
+            other_rois, other_roi_feats, other_bbox_pred, other_cls_score = self.Ensemble_load_tensor(img_metas)
 
         # 为了继续往下传获取预测框所对应的特征图
         # 级联结构,获取roi 而后抽取对应特征
+        final_bbox_feats = None
         for i in range(self.num_stages):
             # 第i个bbox的 roi_extractor 抽取器
             bbox_roi_extractor = self.bbox_roi_extractor[i]
@@ -369,6 +372,7 @@ class CascadeRCNN(BaseDetector, RPNTestMixin):
             # 建议框roi后的特征
             bbox_feats = bbox_roi_extractor(
                 x[:len(bbox_roi_extractor.featmap_strides)], rois)
+            final_bbox_feats = bbox_feats
             '''
             进行roi_feats融合
             '''

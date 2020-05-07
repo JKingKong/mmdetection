@@ -219,7 +219,7 @@ albu_train_transforms = [
 train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='LoadAnnotations', with_bbox=True),
-    dict(type='Resize', img_scale=[(1333, 800),(2666,1600)], keep_ratio=True), # 多尺度训练
+    dict(type='Resize', img_scale=(1333, 800), keep_ratio=True), # 多尺度训练
     dict(type='Pad', size_divisor=32),
 
     dict(
@@ -304,7 +304,7 @@ log_config = dict(
     ])
 # yapf:enable
 # runtime settings
-total_epochs = 50
+total_epochs = 30
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
 work_dir = '/content/drive/My Drive/work_dirs/cascade_rcnn_r50_fpn_1x'
