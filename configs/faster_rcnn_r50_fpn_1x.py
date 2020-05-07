@@ -49,7 +49,8 @@ model = dict(
         reg_class_agnostic=False,        # 是否采用class_agnostic的方式来预测，class_agnostic表示输出bbox时只考虑其是否为前景，后续分类的时候再根据该bbox在网络中的类别得分来分类，也就是说一个框可以对应多个类别
         loss_cls=dict(
             type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0),
-        loss_bbox=dict(type='SmoothL1Loss', beta=1.0, loss_weight=1.0)))
+        loss_bbox=dict(type='SmoothL1Loss', beta=1.0, loss_weight=1.0))
+)
 # model training and testing settings
 train_cfg = dict(
     rpn=dict(
@@ -252,7 +253,7 @@ log_config = dict(
     ])
 # yapf:enable
 # runtime settings
-total_epochs = 30
+total_epochs = 40
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
 work_dir = '/content/drive/My Drive/work_dirs/faster_rcnn_r50_fpn_1x'

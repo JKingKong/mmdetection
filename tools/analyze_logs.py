@@ -13,6 +13,18 @@ python tools/analyze_logs.py plot_curve json/20200426_101118.log.json --key acc 
 # 下边这条命令要对log.json文件进行修改 把含有bbox_mAP的字段拿出来才行
 python tools/analyze_logs.py plot_curve json/formAP.json --key bbox_mAP --legend bbox_mAP 
 
+# mAP
+python tools/analyze_logs.py plot_curve log_cascade_rcnn_fpn_RoIAlign/mAP.log.json --key bbox_mAP bbox_mAP_50 bbox_mAP_75 bbox_mAP_s  --legend bbox_mAP bbox_mAP_50 bbox_mAP_75 bbox_mAP_s
+python tools/analyze_logs.py plot_curve log_faster_rcnn_fpn_RoIAlign/mAP.log.json --key bbox_mAP bbox_mAP_50 bbox_mAP_75 bbox_mAP_s  --legend bbox_mAP bbox_mAP_50 bbox_mAP_75 bbox_mAP_s 
+python tools/analyze_logs.py plot_curve log_faster_rcnn_fpn_RoIAlign/mAP.log.json --key bbox_mAP  --legend bbox_mAP 
+
+# 总loss
+python tools/analyze_logs.py plot_curve log_cascade_rcnn_fpn_RoIAlign/loss.log.json --key loss  --legend loss 
+# 
+python tools/analyze_logs.py plot_curve log_cascade_rcnn_fpn_RoIAlign/loss.log.json --key s2.loss_cls s2.loss_bbox  --legend s2.loss_cls s2.loss_bbox  
+
+
+
 '''
 
 def cal_train_time(log_dicts, args):
