@@ -55,7 +55,6 @@ class HybridDetector(BaseDetector):
         """Directly extract features from the backbone+neck
         """
         x = self.backbone(img)
-
         return x
 
     def forward_dummy(self, img):
@@ -64,7 +63,6 @@ class HybridDetector(BaseDetector):
         See `mmdetection/tools/get_flops.py`
         """
         x = self.extract_feat(img)
-
         outs = self.bbox_head(x)
         return outs
 
@@ -74,15 +72,14 @@ class HybridDetector(BaseDetector):
                       gt_bboxes,
                       gt_labels,
                       gt_bboxes_ignore=None):
-        x = self.extract_feat(img)
-
+        # x = self.extract_feat(img)
         losses = dict()
-
         '''
             获取其他模型的rois,roi_feats,bbox_pred,cls_score
         '''
         other_rois, other_roi_feats, other_bbox_pred, other_cls_score = self.Ensemble_load_tensor(img_metas)
 
+        roi_feats = other_roi_feats
 
         # bbox head forward and loss
         if self.with_bbox:
@@ -149,7 +146,7 @@ class HybridDetector(BaseDetector):
             scale_factor,
             rescale=rescale,
             cfg=rcnn_test_cfg,
-            )
+        )
 
         # 返回一个列表,不是tensor
         # 用浮点数表示，且是一个列表

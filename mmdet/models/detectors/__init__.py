@@ -21,5 +21,5 @@ __all__ = [
     'FastRCNN', 'FasterRCNN', 'MaskRCNN', 'CascadeRCNN', 'HybridTaskCascade',
     'DoubleHeadRCNN', 'RetinaNet', 'FCOS', 'GridRCNN', 'MaskScoringRCNN',
     'RepPointsDetector', 'FOVEA'
-    ,'HybridDetector' # 自定义的 用来进行混合深度学习的
+    # ,'HybridDetector' # 自定义的 用来进行混合深度学习的
 ]
