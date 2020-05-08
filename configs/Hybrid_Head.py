@@ -1,17 +1,7 @@
 # model settings
 model = dict(
     type='HybridDetector',
-    pretrained='torchvision://resnet50',
-    backbone=dict(
-        type='ResNet',
-        depth=50/10,
-        num_stages=4/4,
-        # out_indices=(0, 1, 2, 3),
-        out_indices=(0, 1, 2, 3),
-        frozen_stages=1,
-        norm_cfg=dict(type='BN', requires_grad=True),  # 归一化
-        style='pytorch'),
-
+    backbone=None,
     neck=None,
     # bbox_head 执行用来 回归得到框 和 框中物体分类
     bbox_head=dict(

@@ -13,17 +13,22 @@ python tools/analyze_logs.py plot_curve json/20200426_101118.log.json --key acc 
 # 下边这条命令要对log.json文件进行修改 把含有bbox_mAP的字段拿出来才行
 python tools/analyze_logs.py plot_curve json/formAP.json --key bbox_mAP --legend bbox_mAP 
 
+----csacade rcnn
 # mAP
-python tools/analyze_logs.py plot_curve log_cascade_rcnn_fpn_RoIAlign/mAP.log.json --key bbox_mAP bbox_mAP_50 bbox_mAP_75 bbox_mAP_s  --legend bbox_mAP bbox_mAP_50 bbox_mAP_75 bbox_mAP_s
-python tools/analyze_logs.py plot_curve log_faster_rcnn_fpn_RoIAlign/mAP.log.json --key bbox_mAP bbox_mAP_50 bbox_mAP_75 bbox_mAP_s  --legend bbox_mAP bbox_mAP_50 bbox_mAP_75 bbox_mAP_s 
-python tools/analyze_logs.py plot_curve log_faster_rcnn_fpn_RoIAlign/mAP.log.json --key bbox_mAP  --legend bbox_mAP 
-
+python tools/analyze_logs.py plot_curve log_cascade_rcnn_fpn_RoIAlign/mAP.log.json --key bbox_mAP bbox_mAP_50 bbox_mAP_75 bbox_mAP_s  --legend bbox_AP bbox_AP_50 bbox_AP_75 bbox_AP_s
 # 总loss
 python tools/analyze_logs.py plot_curve log_cascade_rcnn_fpn_RoIAlign/loss.log.json --key loss  --legend loss 
-# 
+# s2.loss_cls s2.loss_bbox
 python tools/analyze_logs.py plot_curve log_cascade_rcnn_fpn_RoIAlign/loss.log.json --key s2.loss_cls s2.loss_bbox  --legend s2.loss_cls s2.loss_bbox  
-
-
+----faster rcnn
+# mAP
+python tools/analyze_logs.py plot_curve log_faster_rcnn_fpn_RoIAlign/mAP.log.json --key bbox_mAP bbox_mAP_50 bbox_mAP_75   --legend bbox_AP bbox_AP_50 bbox_AP_75  
+python tools/analyze_logs.py plot_curve log_faster_rcnn_fpn_RoIAlign/mAP.log.json --key bbox_mAP  --legend bbox_mAP 
+# loss
+python tools/analyze_logs.py plot_curve log_faster_rcnn_fpn_RoIAlign/loss.log.json --key loss  --legend loss
+python tools/analyze_logs.py plot_curve log_faster_rcnn_fpn_RoIAlign/loss.log.json --key loss_bbox  loss_cls --legend loss_bbox loss_cls
+python tools/analyze_logs.py plot_curve log_faster_rcnn_fpn_RoIAlign/loss.log.json --key loss_rpn_bbox loss_rpn_cls  --legend loss_rpn_bbox loss_rpn_cls
+python tools/analyze_logs.py plot_curve log_faster_rcnn_fpn_RoIAlign/loss.log.json --key loss_bbox  loss_cls  loss_rpn_bbox loss_rpn_cls  --legend loss_bbox  loss_cls   loss_rpn_bbox loss_rpn_cls
 
 '''
 

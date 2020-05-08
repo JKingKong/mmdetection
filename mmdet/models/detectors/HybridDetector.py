@@ -7,7 +7,6 @@ from .base import BaseDetector
 import torch
 import torch.nn as nn
 
-from __future__ import division
 
 import torch
 import torch.nn as nn
@@ -37,25 +36,21 @@ class HybridDetector(BaseDetector):
                  test_cfg=None,
                  pretrained=None):
         super(HybridDetector, self).__init__()
-
-        self.backbone = builder.build_backbone(backbone)
         self.bbox_head = builder.build_head(bbox_head)
-
         self.train_cfg = train_cfg
         self.test_cfg = test_cfg
-        self.init_weights(pretrained=pretrained)
+        self.init_weights()
 
     def init_weights(self, pretrained=None):
         super(HybridDetector, self).init_weights(pretrained)
-        self.backbone.init_weights(pretrained=pretrained)
-
+        # 初始化头部
         self.bbox_head.init_weights()
 
     def extract_feat(self, img):
         """Directly extract features from the backbone+neck
         """
-        x = self.backbone(img)
-        return x
+
+        return None
 
     def forward_dummy(self, img):
         """Used for computing network flops.
@@ -72,7 +67,7 @@ class HybridDetector(BaseDetector):
                       gt_bboxes,
                       gt_labels,
                       gt_bboxes_ignore=None):
-        # x = self.extract_feat(img)
+
         losses = dict()
         '''
             获取其他模型的rois,roi_feats,bbox_pred,cls_score
@@ -84,7 +79,7 @@ class HybridDetector(BaseDetector):
         # bbox head forward and loss
         if self.with_bbox:
 
-            cls_score, bbox_pred = self.bbox_head(other_roi_feats)
+            cls_score, bbox_pred = self.bbox_head(roi_feats)
             # sampling_results？？？？？？？？
             bbox_targets = self.bbox_head.get_target(sampling_results,
                                                      gt_bboxes, gt_labels,

@@ -10,11 +10,12 @@ model = dict(
         frozen_stages=1,
         norm_cfg=dict(type='BN', requires_grad=True),  # 归一化
         style='pytorch'),
-    neck=dict(
-        type='FPN',
-        in_channels=[256, 512, 1024, 2048],
-        out_channels=256,
-        num_outs=5),
+    # neck=dict(
+    #     type='FPN',
+    #     in_channels=[256, 512, 1024, 2048],
+    #     out_channels=256,
+    #     num_outs=5),
+    neck=None,
     rpn_head=dict(
         type='RPNHead',
         in_channels=256,
@@ -33,7 +34,7 @@ model = dict(
     # 输出结果: proposal数 * out_channels * roi_layer['out_size'] * roi_layer['out_size']   建议框数目 * 256 * 7 * 7 (本例子)
     bbox_roi_extractor=dict(
         type='SingleRoIExtractor',
-        roi_layer=dict(type='RoIAlign', out_size=7, sample_num=2),
+        roi_layer=dict(type='RoIPool', out_size=7, sample_num=2),
         out_channels=256,
         featmap_strides=[4, 8, 16, 32]),
     # bbox_head 执行用来 回归得到框 和 框中物体分类
@@ -256,8 +257,7 @@ log_config = dict(
 total_epochs = 40
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-work_dir = '/content/drive/My Drive/work_dirs/faster_rcnn_r50_fpn_1x'
-# work_dir = '/content/drive/My Drive/work_dirs/faster_rcnn_r50_fpn_1x'
+work_dir = '/content/drive/My Drive/work_dirs/faster_rcnn_r50_xfpn_xRoIAlign_1x.py'
 
 load_from = None
 resume_from = None

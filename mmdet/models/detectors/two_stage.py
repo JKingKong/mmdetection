@@ -199,7 +199,16 @@ class TwoStageDetector(BaseDetector, RPNTestMixin, BBoxTestMixin,
             proposal_list = self.rpn_head.get_bboxes(*proposal_inputs)
         else:
             proposal_list = proposals
-
+        '''
+        ============
+        proposal_list
+2
+torch.Size([2000, 5])
+******
+torch.Size([2000, 5])
+============
+============
+        '''
         # assign gts and sample proposals
         if self.with_bbox or self.with_mask:
             bbox_assigner = build_assigner(self.train_cfg.rcnn.assigner)
@@ -232,10 +241,23 @@ class TwoStageDetector(BaseDetector, RPNTestMixin, BBoxTestMixin,
                 bbox_feats = self.shared_head(bbox_feats)
             cls_score, bbox_pred = self.bbox_head(bbox_feats)
 
-            # 输出这个看一下
+            # bbox_targets： 长度为4的tuple,元素是tensor
+            '''
+            bbox_targets:长度为4
+            四个元素分别的维度
+            labels：         torch.Size([1024])   
+            label_weights：  torch.Size([1024])
+            bbox_targets     torch.Size([1024, 4])
+            bbox_weights     torch.Size([1024, 4])
+            '''
+            # tensor维度为1维与tensor长度和cls_score,bbox_pred一致,值为0或1,用来表示预测是否命中真实框
             bbox_targets = self.bbox_head.get_target(sampling_results,
                                                      gt_bboxes, gt_labels,
                                                      self.train_cfg.rcnn)
+            print()
+            print(bbox_targets)
+            print(bbox_targets.shape)
+            print()
             loss_bbox = self.bbox_head.loss(cls_score, bbox_pred,
                                             *bbox_targets)
             losses.update(loss_bbox)
