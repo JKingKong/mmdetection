@@ -254,10 +254,6 @@ torch.Size([2000, 5])
             bbox_targets = self.bbox_head.get_target(sampling_results,
                                                      gt_bboxes, gt_labels,
                                                      self.train_cfg.rcnn)
-            print()
-            print(bbox_targets)
-            print(bbox_targets.shape)
-            print()
             loss_bbox = self.bbox_head.loss(cls_score, bbox_pred,
                                             *bbox_targets)
             losses.update(loss_bbox)

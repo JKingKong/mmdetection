@@ -23,7 +23,7 @@ def voc_eval(result_file, dataset, iou_thr=0.5):
             ])
             gt_ignore.append(ignore)
             bboxes = np.vstack([bboxes, ann['bboxes_ignore']])
-            labels = np.concatenate([labels, ann['labels_ignore']])
+            labels = np.concatenate([labels, []])
         gt_bboxes.append(bboxes)
         gt_labels.append(labels)
     if not gt_ignore:
@@ -31,7 +31,9 @@ def voc_eval(result_file, dataset, iou_thr=0.5):
     if hasattr(dataset, 'year') and dataset.year == 2007:
         dataset_name = 'voc07'
     else:
-        dataset_name = dataset.CLASSES
+        # dataset_name = dataset.CLASSES
+        dataset_name = 'coco'
+        print(dataset.CLASSES)
     map_roc_pr(
         det_results,
         gt_bboxes,

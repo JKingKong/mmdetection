@@ -15,9 +15,15 @@ python tools/analyze_logs.py plot_curve json/formAP.json --key bbox_mAP --legend
 
 ----csacade rcnn
 # mAP
-python tools/analyze_logs.py plot_curve log_cascade_rcnn_fpn_RoIAlign/mAP.log.json --key bbox_mAP bbox_mAP_50 bbox_mAP_75 bbox_mAP_s  --legend bbox_AP bbox_AP_50 bbox_AP_75 bbox_AP_s
+python tools/analyze_logs.py plot_curve log_cascade_rcnn_fpn_RoIAlign/mAP.log.json --key bbox_mAP bbox_mAP_50 bbox_mAP_75   --legend bbox_AP bbox_AP_50 bbox_AP_75 
 # 总loss
 python tools/analyze_logs.py plot_curve log_cascade_rcnn_fpn_RoIAlign/loss.log.json --key loss  --legend loss 
+
+python tools/analyze_logs.py plot_curve log_cascade_rcnn_fpn_RoIAlign/loss.log.json --key loss_rpn_bbox loss_rpn_cls  --legend loss_rpn_bbox loss_rpn_cls
+python tools/analyze_logs.py plot_curve log_cascade_rcnn_fpn_RoIAlign/loss.log.json --key s0.loss_cls  s1.loss_cls s2.loss_cls  --legend s0.loss_cls s1.loss_cls  s2.loss_cls 
+python tools/analyze_logs.py plot_curve log_cascade_rcnn_fpn_RoIAlign/loss.log.json --key s0.loss_bbox  s1.loss_bbox s2.loss_bbox --legend s0.loss_bbox s1.loss_bbox s2.loss_bbox 
+
+
 # s2.loss_cls s2.loss_bbox
 python tools/analyze_logs.py plot_curve log_cascade_rcnn_fpn_RoIAlign/loss.log.json --key s2.loss_cls s2.loss_bbox  --legend s2.loss_cls s2.loss_bbox  
 ----faster rcnn

@@ -6,16 +6,21 @@ model = dict(
         type='ResNet',
         depth=50,
         num_stages=4,
-        out_indices=(0, 1, 2, 3),
+        out_indices=(0,1,2,3),
+        # out_indices=(3,),
         frozen_stages=1,
         norm_cfg=dict(type='BN', requires_grad=True),  # 归一化
         style='pytorch'),
+    neck=dict(
+        type='FPN',
+        in_channels=[256, 512, 1024, 2048],
+        out_channels=256,
+        num_outs=5),
     # neck=dict(
     #     type='FPN',
-    #     in_channels=[256, 512, 1024, 2048],
+    #     in_channels=[2048],
     #     out_channels=256,
-    #     num_outs=5),
-    neck=None,
+    #     num_outs=2),
     rpn_head=dict(
         type='RPNHead',
         in_channels=256,
@@ -23,7 +28,9 @@ model = dict(
         anchor_scales=[8],
         # anchor_ratios=[0.5, 1.0, 2.0],
         anchor_ratios=[0.1,0.2,0.5,1.0,2.0,5.0,10.0], # 甘蔗数据集的框宽高比
-        anchor_strides=[4, 8, 16, 32, 64],
+        anchor_strides=[4, 8, 16, 32,64],
+        # anchor_strides=[32,64],
+
         target_means=[.0, .0, .0, .0],
         target_stds=[1.0, 1.0, 1.0, 1.0],
         loss_cls=dict(
@@ -34,7 +41,7 @@ model = dict(
     # 输出结果: proposal数 * out_channels * roi_layer['out_size'] * roi_layer['out_size']   建议框数目 * 256 * 7 * 7 (本例子)
     bbox_roi_extractor=dict(
         type='SingleRoIExtractor',
-        roi_layer=dict(type='RoIPool', out_size=7, sample_num=2),
+        roi_layer=dict(type='RoIPool', out_size=7),
         out_channels=256,
         featmap_strides=[4, 8, 16, 32]),
     # bbox_head 执行用来 回归得到框 和 框中物体分类
@@ -257,7 +264,7 @@ log_config = dict(
 total_epochs = 40
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-work_dir = '/content/drive/My Drive/work_dirs/faster_rcnn_r50_xfpn_xRoIAlign_1x.py'
+work_dir = '/content/drive/My Drive/work_dirs/faster_rcnn_r50_xfpn_xRoIAlign_1x'
 
 load_from = None
 resume_from = None

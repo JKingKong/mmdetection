@@ -28,7 +28,7 @@ model = dict(
         in_channels=1024,
         feat_channels=1024,
         anchor_scales=[2, 4, 8, 16, 32],
-        anchor_ratios=[0.5, 1.0, 2.0],
+        anchor_ratios=[0.1,0.2,0.5,1.0,2.0,5.0,10.0], # 甘蔗数据集的框宽高比
         anchor_strides=[16],
         target_means=[.0, .0, .0, .0],
         target_stds=[1.0, 1.0, 1.0, 1.0],
@@ -37,7 +37,8 @@ model = dict(
         loss_bbox=dict(type='SmoothL1Loss', beta=1.0 / 9.0, loss_weight=1.0)),
     bbox_roi_extractor=dict(
         type='SingleRoIExtractor',
-        roi_layer=dict(type='RoIAlign', out_size=14, sample_num=2),
+        # roi_layer=dict(type='RoIAlign', out_size=14, sample_num=2),
+        roi_layer=dict(type='RoIPool', out_size=14),
         out_channels=1024,
         featmap_strides=[16]),
     bbox_head=dict(
@@ -107,16 +108,90 @@ dataset_type = 'CocoDataset'
 data_root = 'data/coco/'
 img_norm_cfg = dict(
     mean=[102.9801, 115.9465, 122.7717], std=[1.0, 1.0, 1.0], to_rgb=False)
+
+# 设置albu的图像增强方式和参数
+# 查看文档：https://s0pypi0org.icopy.site/project/albumentations/      有像素级(不影响框)  空间级转换(影响框,所以要在上边加keymap 将操作映射到bbox上)
+albu_train_transforms = [
+    dict(
+        type='HorizontalFlip',       # 水平翻转
+        p=0.5),                      # 当前图像应用此操作的概率
+    dict(
+        type='VerticalFlip',         # 垂直翻转
+        p=0.5),
+    dict(
+        type='ShiftScaleRotate',     # 旋转图片角度
+        shift_limit=0.0625,
+        scale_limit=0.0,
+        rotate_limit=180,
+        interpolation=1,
+        p=0.5),
+
+    dict(
+        type='RandomBrightnessContrast',
+        brightness_limit=[0.1, 0.3],
+        contrast_limit=[0.1, 0.3],
+        p=0.2),
+    dict(
+        type='OneOf',
+        transforms=[
+            dict(
+                type='RGBShift',            # 随机移动输入RGB图像的每个通道的值。
+                r_shift_limit=10,
+                g_shift_limit=10,
+                b_shift_limit=10,
+                p=1.0),
+            dict(
+                type='HueSaturationValue',  # 随机改变输入图像的色调、饱和度和值。
+                hue_shift_limit=20,
+                sat_shift_limit=30,
+                val_shift_limit=20,
+                p=1.0)
+        ],
+        p=0.1),
+    dict(type='JpegCompression', quality_lower=85, quality_upper=95, p=0.2),
+
+    dict(type='ChannelShuffle', p=0.1),                     # 图像通道随机交换
+
+    dict(
+        type='OneOf',                                       # 联合操作,下一行定义的transforms
+        transforms=[
+            dict(type='Blur', blur_limit=3, p=1.0),         # 使用大小为[3,blur_limit]的随机内核模糊图像
+            dict(type='MedianBlur', blur_limit=3, p=1.0)
+        ],
+        p=0.1),
+]
+
 train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='LoadAnnotations', with_bbox=True),
-    dict(type='Resize', img_scale=(1333, 800), keep_ratio=True),
-    dict(type='RandomFlip', flip_ratio=0.5),
+    dict(type='Resize', img_scale=(1333, 800), keep_ratio=True),  # 多尺度训练 放大图片 以提升小物体检测精度
+    dict(type='RandomFlip', flip_ratio=0.5),                                    # 训练时数据增强 参考mmdet/datasets/transform.py
     dict(type='Normalize', **img_norm_cfg),
+
+    dict(type='Albu',transforms=albu_train_transforms,                          # 使用Albu进行数据增强
+         bbox_params=dict(
+             type='BboxParams',
+             format='pascal_voc',
+             label_fields=['gt_labels'],
+             min_visibility=0.0,
+             filter_lost_elements=True),
+         keymap={
+             'img': 'image',                # 在图像上使用
+             # 'gt_masks': 'masks',
+             'gt_bboxes': 'bboxes'          # 在bbox上使用
+         },
+        update_pad_shape=False,
+        skip_img_without_anno=True
+         ),
     dict(type='Pad', size_divisor=32),
     dict(type='DefaultFormatBundle'),
-    dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels']),
+    dict(
+        type='Collect',
+        keys=['img', 'gt_bboxes', 'gt_labels'],
+        meta_keys=('filename', 'ori_shape', 'img_shape', 'img_norm_cfg',
+               'pad_shape', 'scale_factor'))
 ]
+
 test_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(
@@ -152,7 +227,7 @@ data = dict(
         pipeline=test_pipeline))
 evaluation = dict(interval=1, metric='bbox')
 # optimizer
-optimizer = dict(type='SGD', lr=0.01, momentum=0.9, weight_decay=0.0001)
+optimizer = dict(type='SGD', lr=0.01/4, momentum=0.9, weight_decay=0.0001)
 optimizer_config = dict(grad_clip=dict(max_norm=35, norm_type=2))
 # learning policy
 lr_config = dict(
@@ -161,20 +236,21 @@ lr_config = dict(
     warmup_iters=500,
     warmup_ratio=1.0 / 3,
     step=[8, 11])
-checkpoint_config = dict(interval=20)
+checkpoint_config = dict(interval=1)
 # yapf:disable
 log_config = dict(
-    interval=50,
+    interval=20,
     hooks=[
         dict(type='TextLoggerHook'),
         # dict(type='TensorboardLoggerHook')
     ])
 # yapf:enable
 # runtime settings
-total_epochs = 300
+total_epochs = 30
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-work_dir = './work_dirs/faster_rcnn_r50_caffe_c4_1x'
+work_dir = '/content/drive/My Drive/work_dirs/faster_rcnn_r50_caffe_c4_1x'
+
 load_from = None
 resume_from = None
 workflow = [('train', 1)]

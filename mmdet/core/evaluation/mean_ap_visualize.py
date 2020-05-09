@@ -85,7 +85,7 @@ def tpfp_imagenet(det_bboxes,
             fp[...] = 1
         else:
             det_areas = (det_bboxes[:, 2] - det_bboxes[:, 0] + 1) * (
-                det_bboxes[:, 3] - det_bboxes[:, 1] + 1)
+                    det_bboxes[:, 3] - det_bboxes[:, 1] + 1)
             for i, (min_area, max_area) in enumerate(area_ranges):
                 fp[i, (det_areas >= min_area) & (det_areas < max_area)] = 1
         return tp, fp
@@ -163,7 +163,7 @@ def tpfp_default(det_bboxes, gt_bboxes, gt_ignore, iou_thr, area_ranges=None):
             fp[...] = 1
         else:
             det_areas = (det_bboxes[:, 2] - det_bboxes[:, 0] + 1) * (
-                det_bboxes[:, 3] - det_bboxes[:, 1] + 1)
+                    det_bboxes[:, 3] - det_bboxes[:, 1] + 1)
             for i, (min_area, max_area) in enumerate(area_ranges):
                 fp[i, (det_areas >= min_area) & (det_areas < max_area)] = 1
         return tp, fp
@@ -178,7 +178,7 @@ def tpfp_default(det_bboxes, gt_bboxes, gt_ignore, iou_thr, area_ranges=None):
             gt_area_ignore = np.zeros_like(gt_ignore, dtype=bool)
         else:
             gt_areas = (gt_bboxes[:, 2] - gt_bboxes[:, 0] + 1) * (
-                gt_bboxes[:, 3] - gt_bboxes[:, 1] + 1)
+                    gt_bboxes[:, 3] - gt_bboxes[:, 1] + 1)
             gt_area_ignore = (gt_areas < min_area) | (gt_areas >= max_area)
         for i in sort_inds:
             if ious_max[i] >= iou_thr:
@@ -219,13 +219,13 @@ def get_cls_results(det_results, gt_bboxes, gt_labels, gt_ignore, class_id):
 
 
 def map_roc_pr(det_results,
-             gt_bboxes,
-             gt_labels,
-             gt_ignore=None,
-             scale_ranges=None,
-             iou_thr=0.5,
-             dataset=None,
-             print_summary=True):
+               gt_bboxes,
+               gt_labels,
+               gt_ignore=None,
+               scale_ranges=None,
+               iou_thr=0.5,
+               dataset=None,
+               print_summary=True):
     """Evaluate mAP of a dataset.
 
     Args:
@@ -244,12 +244,19 @@ def map_roc_pr(det_results,
     Returns:
         tuple: (mAP, [dict, dict, ...])
     """
+
+    # gt_ignore = []
+    # for gtl in gt_labels:
+    #   one = []
+    #   for o in gtl:
+    #     one.append(0)
+    #   gt_ignore.append(one)
     assert len(det_results) == len(gt_bboxes) == len(gt_labels)
     if gt_ignore is not None:
         assert len(gt_ignore) == len(gt_labels)
         for i in range(len(gt_ignore)):
             assert len(gt_labels[i]) == len(gt_ignore[i])
-    area_ranges = ([(rg[0]**2, rg[1]**2) for rg in scale_ranges]
+    area_ranges = ([(rg[0] ** 2, rg[1] ** 2) for rg in scale_ranges]
                    if scale_ranges is not None else None)
     num_scales = len(scale_ranges) if scale_ranges is not None else 1
     eval_results = []
@@ -257,7 +264,7 @@ def map_roc_pr(det_results,
     gt_labels = [
         label if label.ndim == 1 else label[:, 0] for label in gt_labels
     ]
-    
+
     f_measure_list = []
     recall_list = []
     precision_list = []
@@ -282,7 +289,7 @@ def map_roc_pr(det_results,
                 num_gts[0] += np.sum(np.logical_not(cls_gt_ignore[j]))
             else:
                 gt_areas = (bbox[:, 2] - bbox[:, 0] + 1) * (
-                    bbox[:, 3] - bbox[:, 1] + 1)
+                        bbox[:, 3] - bbox[:, 1] + 1)
                 for k, (min_area, max_area) in enumerate(area_ranges):
                     num_gts[k] += np.sum(
                         np.logical_not(cls_gt_ignore[j]) &
@@ -301,7 +308,6 @@ def map_roc_pr(det_results,
         precisions = tp / np.maximum((tp + fp), eps)
         # calculate AP
 
-      
         if scale_ranges is None:
             recalls = recalls[0, :]
             precisions = precisions[0, :]
@@ -309,14 +315,11 @@ def map_roc_pr(det_results,
         mode = 'area' if dataset != 'voc07' else '11points'
 
         ap = average_precision(recalls, precisions, mode)
-        
-        
-        #------------collect data--------------#
+
+        # ------------collect data--------------#
         recall_list.append(recalls)
         precision_list.append(precisions)
         ap_list.append(ap)
-
-        
 
         eval_results.append({
             'num_gts': num_gts,
@@ -325,18 +328,18 @@ def map_roc_pr(det_results,
             'precision': precisions,
             'ap': ap
         })
-        
-        #-----------F_measure calculation--------------#
+
+        # -----------F_measure calculation--------------#
 
         top = recalls * precisions
         down = recalls + precisions
-        f_measure = np.mean(2*(top/down))
+        f_measure = np.mean(2 * (top / down))
         f_measure_list.append(f_measure)
 
-    label_names = get_classes(dataset) 
-    #------------plot PR / F-measure-----------#
+    label_names = get_classes(dataset)
+    # ------------plot PR / F-measure-----------#
     plt.figure(figsize=(6, 10))
-    #------------plot curve--------------------#
+    # ------------plot curve--------------------#
     for i in range(num_classes):
         plt.subplots_adjust(hspace=0.3)
         plt.subplot(211)
@@ -347,15 +350,15 @@ def map_roc_pr(det_results,
         plt.ylabel('Precision')
         plt.axis([0, 1, 0, 1])
         plt.legend()
-        
+
         plt.subplot(212)
         plt.title('F-measure')
         plt.bar(label_names[i], f_measure_list[i])
         for a, b in zip(label_names, f_measure_list):
-            plt.text(a, b, '%.4f' % b, color='black', fontweight='bold') 
-        
-    plt.savefig('/mmdetection/PR_Curve_each_class.png')
- 
+            plt.text(a, b, '%.4f' % b, color='black', fontweight='bold')
+
+    plt.savefig('/content/mmdetection/PR_Curve_each_class.png')
+
     if scale_ranges is not None:
         # shape (num_classes, num_scales)
         all_ap = np.vstack([cls_result['ap'] for cls_result in eval_results])
@@ -374,7 +377,7 @@ def map_roc_pr(det_results,
         mean_ap = np.array(aps).mean().item() if aps else 0.0
     if print_summary:
         pass
-#         print_map_summary(mean_ap, eval_results, dataset)
+    #         print_map_summary(mean_ap, eval_results, dataset)
 
     return mean_ap, eval_results
 
@@ -409,8 +412,6 @@ def print_map_summary(mean_ap, results, dataset=None):
         label_names = get_classes(dataset)
     else:
         label_names = dataset
-        
-
 
     if not isinstance(mean_ap, list):
         mean_ap = [mean_ap]
