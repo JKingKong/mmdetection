@@ -266,15 +266,15 @@ def save_tensor(valid_mask = None,  # 过滤掉低分
         final_bboxes = final_bboxes[top_max_inds]
         final_scores = final_scores[top_max_inds]
         final_labels = final_labels[top_max_inds]
-    print()
-    print("final_rois:",final_rois.shape)
-    print("final_roi_feats:", final_roi_feats.shape)
-    print("final_bbox_pred:", final_bbox_pred.shape)
-    print("final_cls_score:", final_cls_score.shape)
-    print("final_bboxes:", final_bboxes.shape)
-    print("final_scores:", final_scores.shape)
-    print("final_labels:", final_labels.shape)
-    print()
+    # print()
+    # print("final_rois:",final_rois.shape)
+    # print("final_roi_feats:", final_roi_feats.shape)
+    # print("final_bbox_pred:", final_bbox_pred.shape)
+    # print("final_cls_score:", final_cls_score.shape)
+    # print("final_bboxes:", final_bboxes.shape)
+    # print("final_scores:", final_scores.shape)
+    # print("final_labels:", final_labels.shape)
+    # print()
 
     # 4、保存经过过滤后的预测框的张量
     # 更好的方案是把这几个张量用list保存到一个.pt张量文件里,读取之时按照下标取对应的张量对象,不然Io可能会很长时间

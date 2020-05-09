@@ -345,7 +345,7 @@ torch.Size([2000, 5])
         # 科学计数法
         det_bboxes, det_labels = self.simple_test_bboxes(
             x, img_metas, proposal_list, self.test_cfg.rcnn, rescale=rescale,
-            mode_name=self.mode_name
+            mode_name=self.mode_name,save_mode=True,
         )
 
         # 返回一个列表,不是tensor

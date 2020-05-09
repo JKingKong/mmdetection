@@ -318,7 +318,7 @@ class CascadeRCNN(BaseDetector, RPNTestMixin):
         return losses
 
     def simple_test(self, img, img_metas, proposals=None, rescale=False,
-                    Ensemble_Test=False
+                    Ensemble_Test=True
                     ):
         """Run inference on a single image.
 

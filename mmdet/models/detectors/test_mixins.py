@@ -100,7 +100,8 @@ class BBoxTestMixin(object):
                            proposals,
                            rcnn_test_cfg,
                            rescale=False,
-                           mode_name=None
+                           mode_name=None,
+                           save_mode=False,
                            ):
         ####====================================================================================
         """Test only det bboxes without augmentation."""
