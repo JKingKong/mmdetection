@@ -165,7 +165,7 @@ class BBoxTestMixin(object):
             scale_factor,
             rescale=rescale,
             cfg=rcnn_test_cfg,
-            save_mode=False,
+            save_mode=save_mode,
             roi_feats=roi_feats,  # 新加入的参数   为了得到预测框所对应的特征图
             img_metas=img_metas,
             mode_name=mode_name

@@ -376,7 +376,7 @@ class CascadeRCNN(BaseDetector, RPNTestMixin):
             '''
             进行roi_feats融合
             '''
-            if i == 1 and  Ensemble_Test==True: # 第一级联融合其他模型的roi_feats
+            if i == 0 and  Ensemble_Test==True: # 第一级联融合其他模型的roi_feats
                 bbox_feats = torch.cat((bbox_feats,other_roi_feats),0)
 
             if self.with_shared_head:
@@ -394,7 +394,7 @@ class CascadeRCNN(BaseDetector, RPNTestMixin):
             if i < self.num_stages - 1: # 如果使用的是级联结构
                 bbox_label = cls_score.argmax(dim=1)
                 # 传入当前级数得到的回归框, 以当前回归框 计算其roi,将这个roi传入下一级模块 (这样的效果就会使得回归框不断接近真实框)
-                if i == 1 and  Ensemble_Test==True:  # 第一级联 融合其他模型的 rois
+                if i == 0 and  Ensemble_Test==True:  # 第一级联 融合其他模型的 rois
                     '''
                     rois融合
                     '''
@@ -480,17 +480,17 @@ class CascadeRCNN(BaseDetector, RPNTestMixin):
 
         images_name = img_metas[0]['filename'].split("/")[-1].split(".")[0]
         # 保存框对应的rois(rois是用来作为roi_extractor的输入)张量
-        save_path = save_path + images_name + "-rois.pt"
-        rois = torch.load(save_path)
+        p1 = save_path + images_name + "-rois.pt"
+        rois = torch.load(p1)
         # 保存roi_extractor的输出张量
-        save_path = save_path + images_name + "-roi_feats.pt"
-        roi_feats = torch.load(save_path)
+        p2 = save_path + images_name + "-roi_feats.pt"
+        roi_feats = torch.load(p2)
         # 保存预测框张量
-        save_path = save_path + images_name + "-bbox_pred.pt"
-        bbox_pred = torch.load(save_path)
+        p3 = save_path + images_name + "-bbox_pred.pt"
+        bbox_pred = torch.load(p3)
         # 保存预测框分数
-        save_path = save_path + images_name + "-cls_score.pt"
-        cls_score = torch.load(save_path)
+        p4 = save_path + images_name + "-cls_score.pt"
+        cls_score = torch.load(p4)
         return rois,roi_feats,bbox_pred,cls_score
 
     def aug_test(self, imgs, img_metas, proposals=None, rescale=False):

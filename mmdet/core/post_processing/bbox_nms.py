@@ -287,30 +287,30 @@ def save_tensor(valid_mask = None,  # 过滤掉低分
     为了方便融合特征,将当前保存成文件
     '''
     # 保存框对应的rois(rois是用来作为roi_extractor的输入)张量
-    save_path = save_path + images_name + "-rois.pt"
-    torch.save(final_rois,save_path)
+    p1 = save_path + images_name + "-rois.pt"
+    torch.save(final_rois,p1)
     # 保存roi_extractor的输出张量
-    save_path = save_path + images_name + "-roi_feats.pt"
-    torch.save(final_roi_feats,save_path)
+    p2 = save_path + images_name + "-roi_feats.pt"
+    torch.save(final_roi_feats,p2)
     # 保存预测框张量
-    save_path = save_path + images_name + "-bbox_pred.pt"
-    torch.save(final_bbox_pred,save_path)
+    p3 = save_path + images_name + "-bbox_pred.pt"
+    torch.save(final_bbox_pred,p3)
     # 保存预测框分数
-    save_path = save_path + images_name + "-cls_score.pt"
-    torch.save(final_cls_score,save_path)
+    p4 = save_path + images_name + "-cls_score.pt"
+    torch.save(final_cls_score,p4)
 
     '''
     为了方便使用自己编写的Ensemble_union 和 Ensemble_intersection函数
     '''
     # 保存bboxes,为了方便使用自己编写的Ensemble_union 和 Ensemble_intersection函数
-    save_path = save_path + images_name + "-bboxes.pt"
-    torch.save(final_bboxes,save_path)
+    p5 = save_path + images_name + "-bboxes.pt"
+    torch.save(final_bboxes,p5)
 
-    save_path = save_path + images_name + "-scores.pt"
-    torch.save(final_scores, save_path)
+    p6 = save_path + images_name + "-scores.pt"
+    torch.save(final_scores, p6)
 
-    save_path = save_path + images_name + "-labels.pt"
-    torch.save(final_labels,save_path)
+    p7 = save_path + images_name + "-labels.pt"
+    torch.save(final_labels,p7)
 
 def Ensemble_bboxes_union(
                    img_metas=None,
@@ -326,18 +326,18 @@ def Ensemble_bboxes_union(
     :return: 不同模型检测框的并集,而后再经过NMS抑制最终返回结果
     '''
     save_path = "/content/drive/My Drive/detect-tensor/" + mode_name + "/"
-
+    mode_name = 'FasterRCNN'
     images_name = img_metas[0]['filename'].split("/")[-1].split(".")[0]
     # 保存框对应的rois(rois是用来作为roi_extractor的输入)张量
     # 1、读取其他模型的tensor
-    save_path = save_path + images_name + "-bboxes.pt"
-    other_bboxes = torch.load(save_path)
+    p1 = save_path + images_name + "-bboxes.pt"
+    other_bboxes = torch.load(p1)
 
-    save_path = save_path + images_name + "-scores.pt"
-    other_scores = torch.load(save_path)
+    p2 = save_path + images_name + "-scores.pt"
+    other_scores = torch.load(p2)
 
-    save_path = save_path + images_name + "-labels.pt"
-    other_labels = torch.load(save_path)
+    p3 = save_path + images_name + "-labels.pt"
+    other_labels = torch.load(p3)
 
     # 2、并集融合
     bboxes = torch.cat((cur_bboxes,other_bboxes),0)
@@ -360,18 +360,18 @@ def Ensembel_bboxes_intersection(
      '''
 
     save_path = "/content/drive/My Drive/detect-tensor/" + mode_name + "/"
-
+    mode_name = 'FasterRCNN'
     images_name = img_metas[0]['filename'].split("/")[-1].split(".")[0]
     # 保存框对应的rois(rois是用来作为roi_extractor的输入)张量
     # 1、读取其他模型的tensor
-    save_path = save_path + images_name + "-bboxes.pt"
-    other_bboxes = torch.load(save_path)
+    p1 = save_path + images_name + "-bboxes.pt"
+    other_bboxes = torch.load(p1)
 
-    save_path = save_path + images_name + "-scores.pt"
-    other_scores = torch.load(save_path)
+    p2 = save_path + images_name + "-scores.pt"
+    other_scores = torch.load(p2)
 
-    save_path = save_path + images_name + "-labels.pt"
-    other_labels = torch.load(save_path)
+    p3 = save_path + images_name + "-labels.pt"
+    other_labels = torch.load(p3)
 
     # 2、交集融合
     bboxes = torch.cat((cur_bboxes, other_bboxes), 0)
