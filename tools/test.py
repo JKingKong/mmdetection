@@ -159,6 +159,11 @@ def main():
         model = MMDataParallel(model, device_ids=[0])
         # 测试函数
         outputs = single_gpu_test(model, data_loader, args.show)
+        print("--------------------------------------------")
+        print(outputs.shape)
+        print(outputs[0].shape)
+        print(outputs)
+        print("--------------------------------------------")
     else:
         # 分布式
         model = MMDistributedDataParallel(
