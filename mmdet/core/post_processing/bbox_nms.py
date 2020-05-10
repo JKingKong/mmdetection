@@ -114,7 +114,7 @@ def multiclass_nms(multi_bboxes,
 
     '''
     # 模型集成性能测试
-    if Ensemble_Test == True:
+    if Ensemble_Test == True and False:
         bboxes,scores,labels = Ensemble_bboxes_union(
             img_metas=img_metas,
             mode_name=mode_name,
