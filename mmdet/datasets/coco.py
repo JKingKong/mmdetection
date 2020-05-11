@@ -12,6 +12,7 @@ from mmdet.utils import print_log
 from .custom import CustomDataset
 from .registry import DATASETS
 
+from mmdet.core.evaluation.mean_ap import tpfp_default,tpfp_imagenet
 
 @DATASETS.register_module
 class CocoDataset(CustomDataset):
@@ -363,6 +364,15 @@ class CocoDataset(CustomDataset):
 
             iou_type = 'bbox' if metric == 'proposal' else metric
             cocoEval = COCOeval(cocoGt, cocoDt, iou_type)
+            print("--------------")
+            print(cocoGt[0])
+            print()
+            print(cocoDt[0])
+            print()
+            tp, fp = tpfp_default(cocoDt[0],cocoGt[0])
+            print(tp,fp)
+            print((tp)/(tp+fp))
+            print("--------------")
             cocoEval.params.imgIds = self.img_ids
             if metric == 'proposal':
                 cocoEval.params.useCats = 0
